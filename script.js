@@ -4,30 +4,44 @@ const ctx = c.getContext('2d')
 
 // Clamp number between two values with the following line:
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-let b1, I;
+let Boids, target
+let I
 
 function Init() {
     let { w, h } = resizeWindow()
 
-    b1 = new Boid(10, 10, 30, 30)
-    b1.randomLocation(w, h)
+    target = new Target(10, 100)
+    target.randomLocation(w, h)
+
+    Boids = new BoidController(100)
+    Boids.spawn(w, h, target)
+
+    // Setup Keyboard Input
     I = new IO()
+    I.addKeyListeners();
 
     loop()
 }
 
-function loop() {
-    let { w, h } = resizeWindow()
-    ctx.clearRect(0, h, w, h)
+function update() {
+    target.move(w, h, I.keyState)
+    Boids.move(w, h)
+}
 
+function draw(w, h) {
+    ctx.clearRect(0, h, w, h)
     ctx.fillStyle = "red"
     ctx.fillRect(0, 0, w, h)
 
-    I.addKeyListeners();
+    target.draw()
+    Boids.draw()
+}
 
-    b1.draw()
-    b1.move(w, h, I.keyState)
-    b1.debug(w, h)
+function loop() {
+    let { w, h } = resizeWindow()
+
+    update()
+    draw(w, h)
 
     requestAnimationFrame(loop)
 }
@@ -39,6 +53,70 @@ function resizeWindow() {
     h = window.innerHeight
 
     return { w, h }
+}
+
+class Target {
+    constructor(x, y) {
+        this.x = x
+        this.y = y
+
+        this.color = "black"
+    }
+
+    randomLocation(w, h) {
+        if (w == null || h == null) {
+            w = 500
+            h = 500
+        }
+
+        let rand = Math.random()
+        this.x = rand*w
+        rand = Math.random()
+        this.y = rand*h
+
+    }
+
+    move(w, h, dir) {
+        if (dir.right) this.x += 5
+        if (dir.left) this.x -= 5
+        if (dir.up) this.y -= 5
+        if (dir.down) this.y += 5
+
+    }
+
+    draw() {
+        ctx.color = this.color
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 5, 0, 2 * Math.PI);
+        ctx.stroke();
+    }
+}
+
+class BoidController {
+
+    constructor(maxInst){
+        this.instances = new Array()
+        this.maxInst = maxInst
+    }
+
+    spawn(w, h, t) {
+        for (let i = 0; i < this.maxInst; i++) { 
+            let b = new Boid(10, 10, 30, 30)
+            b.randomLocation(w, h)
+            b.target = t
+            this.instances.push(b)
+        }
+    }
+
+    draw() {
+        this.instances.forEach(b => b.draw())
+    }
+
+    move(w, h){
+        for (let i = 0; i < this.instances.length; i++) { 
+            this.instances[i].move(w, h)
+        }
+    }
 }
 
 class Boid {
@@ -55,8 +133,7 @@ class Boid {
 
         this.xvel = 1
         this.yvel = 1
-        this.accel = 0.1
-        this.maxSpeed = 4
+        this.accel = 0.4
 
         this.target = { x: 0, y: 0}
 
@@ -71,15 +148,9 @@ class Boid {
         }
 
         let rand = Math.random()
-        if (rand < 0.5) { // side
-            this.x = rand < 0.5 ? -this.w - 5 : w + 5
-            rand = Math.random()
-            this.y = rand*(h+10) - 5
-        } else { // top/bottom
-            this.x = rand*(w+10) - 5
-            rand = Math.random()
-            this.y = rand < 0.5 ? -this.h - 5 : h + 5
-        }
+        this.x = rand*w
+        rand = Math.random()
+        this.y = rand*h
 
     }
 
@@ -92,34 +163,17 @@ class Boid {
         ctx.fill();
     }
 
-    move(w, h, dir) {
-        // Increase speed if keydown
-        // if (dir.right) this.angle += this.turnSpeed
-        // if (dir.left)  this.angle -= this.turnSpeed
+    move(w, h) {
+        let xdiff = this.target.x - this.x
+        let ydiff = this.target.y - this.y
+        let distance = Math.sqrt(xdiff*xdiff + ydiff*ydiff)
 
-        // if (dir.down)  this.angle += this.turnSpeed
-        // if (dir.up)    this.angle -= this.turnSpeed
-
-        // let targetx = w/2
-        // let targety = h/2
-        // let xcomp = targetx - this.x
-        // let ycomp = targety - this.y
-        // let mag = Math.sqrt(xcomp*xcomp + ycomp*ycomp)
-        // this.xdir = xcomp/mag
-        // this.ydir = ycomp/mag
-
-        // this.angle = Math.atan(ycomp/xcomp)
-        this.target.x = w/2
-        this.target.y = h/2
-        let xcomp = this.target.x - this.x
-        let ycomp = this.target.y - this.y
-        let distance = Math.sqrt(xcomp*xcomp + ycomp*ycomp)
-
-        let targetxdir = xcomp/distance
-        let targetydir = ycomp/distance
+        let targetxdir = xdiff/distance
+        let targetydir = ydiff/distance
 
         this.xvel += this.accel*targetxdir
         this.yvel += this.accel*targetydir
+
         this.calculateDir();
 
         this.x += this.xvel
@@ -134,9 +188,6 @@ class Boid {
             this.xdir = this.xvel/mag
             this.ydir = this.yvel/mag
         }
-
-        // this.x = clamp(this.x, this.w/2 + 5, w - this.w/2 - 5)
-        // this.y = clamp(this.y, this.h/2 + 5, h - this.h/2 - 5)
     }
 
     keepOnScreen(w, h) {
@@ -156,22 +207,18 @@ class Boid {
         ctx.fillText("xvel, yvel: " + this.xvel.toFixed(2) + " " + this.yvel.toFixed(2), x, y)
         y += 20
         ctx.fillText("targetx, targety: " + this.target.x.toFixed(2) + " " + this.target.y.toFixed(2), x, y)
-        y += 20
-        this.target.x = w/2
-        this.target.y = h/2
-        let xcomp = this.target.x - this.x
-        let ycomp = this.target.y - this.y
-        let distance = Math.sqrt(xcomp*xcomp + ycomp*ycomp)
 
-        let targetxdir = xcomp/distance
-        let targetydir = ycomp/distance
+        // TARGET LINE
+        let xdiff = this.target.x - this.x
+        let ydiff = this.target.y - this.y
+        let distance = Math.sqrt(xdiff*xdiff + ydiff*ydiff)
 
-        ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
-        ctx.lineTo(this.x + targetxdir*20, this.y + targetydir*20);
-        ctx.stroke();
-
-        ctx.fillText("targetxdir, targetydir: " + targetxdir.toFixed(2) + " " + targetydir.toFixed(2), x, y)
+        let targetxdir = xdiff/distance
+        let targetydir = ydiff/distance
+        ctx.beginPath()
+        ctx.moveTo(this.x, this.y)
+        ctx.lineTo(this.x + targetxdir*20, this.y + targetydir*20)
+        ctx.stroke()
     }
 }
 
