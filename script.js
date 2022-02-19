@@ -4,6 +4,7 @@ const ctx = c.getContext('2d')
 
 // Clamp number between two values with the following line:
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
 let Boids, target
 let I
 
@@ -12,7 +13,7 @@ function Init() {
 
     target = new Target(w/2, h/2)
 
-    Boids = new BoidController(10) // Number of Boids
+    Boids = new BoidController(1000) // Number of Boids
     Boids.spawn(w, h, target)
 
     // Setup Keyboard Input
@@ -126,6 +127,8 @@ class BoidController {
             
             // Avoid
             for (let j = 0; j < this.instances.length; j++) { // each Boid
+                // Calculate angle
+
                 if (j == i) continue // not itself
                 let o = this.instances[j]
 
@@ -133,7 +136,13 @@ class BoidController {
                 let ydiff = b.y - o.y
                 let distance = Math.sqrt(xdiff*xdiff + ydiff*ydiff)
 
+                // CHECK IF NOT BEHIND
                 if (distance < b.field) {
+
+                    let d = b.xdir*(xdiff/distance) + b.ydir*(ydiff/distance)
+                    let angle = Math.acos(d)
+                    if (angle < b.peripheral) continue // behind
+
                     let fieldxtip = b.x + b.xdir*b.field
                     let fieldytip = b.y + b.ydir*b.field
 
@@ -141,11 +150,14 @@ class BoidController {
                     let avoidy = o.y - fieldytip
 
                     let avoidmag = Math.sqrt(avoidx*avoidx + avoidy*avoidy)
-                    b.avoidxdir = avoidx/avoidmag
-                    b.avoidydir = avoidy/avoidmag
-                    // console.log(avoidxdir, avoidydir)
-                    // b.x += b.avoidxdir*4
-                    // b.y += b.avoidydir*4
+                    let avoidxdir = avoidx/avoidmag
+                    let avoidydir = avoidy/avoidmag
+
+                    b.xdir -= avoidxdir*0.1
+                    b.ydir -= avoidydir*0.1
+                    b.normalizeDir()
+
+                    o.avoidDebug(w, h, avoidxdir, avoidydir)
                     
                 } else {
                     // b.avoidxdir = b.xdir
@@ -170,20 +182,15 @@ class Boid {
 
         this.angle = 0 // radians
 
-        this.xdir = 1
-        this.ydir = 1
+        this.xdir = Math.random()
+        this.ydir = Math.random()
+        this.normalizeDir()
 
-        this.avoidxdir = 0
-        this.avoidydir = 1
-
-        this.xvel = Math.random()*1
-        this.yvel = Math.random()*1
-        this.accel = 0.01
-
+        this.speed = 0.5
         this.field = 100
+        this.peripheral = 1.5 //angle
 
         this.target = { x: 0, y: 0}
-
         this.color = '#ffd6cc'
     }
 
@@ -208,12 +215,11 @@ class Boid {
         ctx.lineTo(this.x + this.w/4*this.ydir, this.y - this.w/4*this.xdir)
         ctx.fill();
 
-        ctx.color = "black"
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.field, 0, 2 * Math.PI);
-        ctx.stroke();
-
-        this.avoidDebug()
+        // this.avoidDebug()
+        // ctx.color = "black"
+        // ctx.beginPath();
+        // ctx.arc(this.x, this.y, this.field, 0, 2 * Math.PI);
+        // ctx.stroke();
     }
 
     moveTarget(w, h) {
@@ -224,26 +230,26 @@ class Boid {
         let targetxdir = xdiff/distance
         let targetydir = ydiff/distance
 
-        this.xvel += this.accel*targetxdir
-        this.yvel += this.accel*targetydir
+        this.xdir += targetxdir*0.1
+        this.ydir += targetydir*0.1
+
+        this.normalizeDir();
     }
 
     move(w, h) {
         // this.moveTarget(w, h); // Orbit around center
 
-        this.calculateDir();
 
-        this.x += this.xvel
-        this.y += this.yvel
-
+        this.x += this.xdir*this.speed
+        this.y += this.ydir*this.speed
         this.wrapScreen(w, h)
     }
 
-    calculateDir() {
-        let mag = Math.sqrt(this.xvel*this.xvel + this.yvel*this.yvel)
+    normalizeDir() {
+        let mag = Math.sqrt(this.xdir*this.xdir + this.ydir*this.ydir)
         if (mag > 0) {
-            this.xdir = this.xvel/mag
-            this.ydir = this.yvel/mag
+            this.xdir /= mag
+            this.ydir /= mag
         }
     }
 
@@ -275,10 +281,14 @@ class Boid {
 
     avoidDebug(w, h) {
         // TARGET LINE
-        ctx.beginPath()
-        ctx.moveTo(this.x, this.y)
-        ctx.lineTo(this.x + this.avoidxdir*this.field, this.y + this.avoidydir*this.field)
-        ctx.stroke()
+        // ctx.color = 'black'
+        // let angle = Math.acos(this.xdir*1)
+        // let xdir = Math.cos(this.peripheral + angle)
+        // let ydir = Math.sin(this.peripheral + angle)
+        // ctx.beginPath()
+        // ctx.moveTo(this.x, this.y)
+        // ctx.lineTo(this.x + xdir*this.field, this.y + ydir*this.field)
+        // ctx.stroke()
     }
 
     debug(w, h) {
