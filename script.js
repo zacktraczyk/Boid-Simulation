@@ -14,7 +14,7 @@ function Init() {
     target = new Target(w/2, h/2)
 
     Boids = new BoidController(1000) // Number of Boids
-    Boids.spawn(w, h, target)
+    Boids.spawn(w, h)
 
     // Setup Keyboard Input
     I = new IO()
@@ -99,11 +99,10 @@ class BoidController {
         this.maxInst = maxInst
     }
 
-    spawn(w, h, t) {
+    spawn(w, h) {
         for (let i = 0; i < this.maxInst; i++) { 
             let b = new Boid(10, 10, 30, 30)
             b.randomLocation(w, h)
-            b.target = t
             this.instances.push(b)
         }
 
@@ -124,6 +123,9 @@ class BoidController {
     move(w, h){
         for (let i = 0; i < this.instances.length; i++) { // each Boid
             let b = this.instances[i]
+            b.target.x = 0 
+            b.target.y = 0 
+            let infield = 0
             
             // Avoid
             for (let j = 0; j < this.instances.length; j++) { // each Boid
@@ -135,11 +137,18 @@ class BoidController {
                 let distance = Math.sqrt(xdiff*xdiff + ydiff*ydiff)
 
                 if (distance < b.field) {
+                    b.target.x += o.x
+                    b.target.y += o.y
+                    infield++;
+
+
                     // Move in same direction
                     let subx = o.xdir - b.xdir
                     let suby = o.ydir - b.ydir
-                    b.xdir += subx*.01
-                    b.ydir += suby*0.1
+                    // b.xdir += subx*b.speed/20
+                    // b.ydir += suby*b.speed/20
+                    b.xdir += subx*.05
+                    b.ydir += suby*.05
                     b.normalizeDir()
 
                     // Calculate angle
@@ -147,6 +156,7 @@ class BoidController {
                     let angle = Math.acos(d)
                     if (angle < b.peripheral) continue // skip bc behind
 
+                    // Avoid
                     let fieldxtip = b.x + b.xdir*b.field
                     let fieldytip = b.y + b.ydir*b.field
 
@@ -157,14 +167,18 @@ class BoidController {
                     let avoidxdir = avoidx/avoidmag
                     let avoidydir = avoidy/avoidmag
 
-                    b.xdir -= avoidxdir*0.1
-                    b.ydir -= avoidydir*0.1
+                    b.xdir -= avoidxdir*b.speed/20
+                    b.ydir -= avoidydir*b.speed/20
+                    // b.xdir -= avoidxdir*0.5
+                    // b.ydir -= avoidydir*0.5
                     b.normalizeDir()
 
                     o.avoidDebug(w, h, avoidxdir, avoidydir)
                 }
             }
 
+            if (infield > 0) b.target.x /= infield
+            if (infield > 0) b.target.y /= infield
             b.move(w, h)
 
         }
@@ -185,8 +199,8 @@ class Boid {
         this.ydir = Math.random()*2 - 1
         this.normalizeDir()
 
-        this.speed = 3
-        this.field = 100
+        this.speed = 0.8
+        this.field = 200
         this.peripheral = 1.1 //angle
 
         this.target = { x: 0, y: 0}
@@ -229,15 +243,14 @@ class Boid {
         let targetxdir = xdiff/distance
         let targetydir = ydiff/distance
 
-        this.xdir += targetxdir*0.1
-        this.ydir += targetydir*0.1
+        this.xdir += targetxdir*this.speed/20
+        this.ydir += targetydir*this.speed/20
 
         this.normalizeDir();
     }
 
     move(w, h) {
-        // this.moveTarget(); // Orbit around center
-
+        this.moveTarget(); // Orbit around center
 
         this.x += this.xdir*this.speed
         this.y += this.ydir*this.speed
