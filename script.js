@@ -127,8 +127,6 @@ class BoidController {
             
             // Avoid
             for (let j = 0; j < this.instances.length; j++) { // each Boid
-                // Calculate angle
-
                 if (j == i) continue // not itself
                 let o = this.instances[j]
 
@@ -136,12 +134,18 @@ class BoidController {
                 let ydiff = b.y - o.y
                 let distance = Math.sqrt(xdiff*xdiff + ydiff*ydiff)
 
-                // CHECK IF NOT BEHIND
                 if (distance < b.field) {
+                    // Move in same direction
+                    let subx = o.xdir - b.xdir
+                    let suby = o.ydir - b.ydir
+                    b.xdir += subx*.01
+                    b.ydir += suby*0.1
+                    b.normalizeDir()
 
+                    // Calculate angle
                     let d = b.xdir*(xdiff/distance) + b.ydir*(ydiff/distance)
                     let angle = Math.acos(d)
-                    if (angle < b.peripheral) continue // behind
+                    if (angle < b.peripheral) continue // skip bc behind
 
                     let fieldxtip = b.x + b.xdir*b.field
                     let fieldytip = b.y + b.ydir*b.field
@@ -158,12 +162,7 @@ class BoidController {
                     b.normalizeDir()
 
                     o.avoidDebug(w, h, avoidxdir, avoidydir)
-                    
-                } else {
-                    // b.avoidxdir = b.xdir
-                    // b.avoidydir = b.ydir
                 }
-
             }
 
             b.move(w, h)
@@ -182,13 +181,13 @@ class Boid {
 
         this.angle = 0 // radians
 
-        this.xdir = Math.random()
-        this.ydir = Math.random()
+        this.xdir = Math.random()*2 - 1
+        this.ydir = Math.random()*2 - 1
         this.normalizeDir()
 
-        this.speed = 0.5
+        this.speed = 3
         this.field = 100
-        this.peripheral = 1.5 //angle
+        this.peripheral = 1.1 //angle
 
         this.target = { x: 0, y: 0}
         this.color = '#ffd6cc'
@@ -222,7 +221,7 @@ class Boid {
         // ctx.stroke();
     }
 
-    moveTarget(w, h) {
+    moveTarget() {
         let xdiff = this.target.x - this.x
         let ydiff = this.target.y - this.y
         let distance = Math.sqrt(xdiff*xdiff + ydiff*ydiff)
@@ -237,7 +236,7 @@ class Boid {
     }
 
     move(w, h) {
-        // this.moveTarget(w, h); // Orbit around center
+        // this.moveTarget(); // Orbit around center
 
 
         this.x += this.xdir*this.speed
