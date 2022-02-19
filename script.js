@@ -10,10 +10,9 @@ let I
 function Init() {
     let { w, h } = resizeWindow()
 
-    target = new Target(10, 100)
-    target.randomLocation(w, h)
+    target = new Target(w/2, h/2)
 
-    Boids = new BoidController(100)
+    Boids = new BoidController(10) // Number of Boids
     Boids.spawn(w, h, target)
 
     // Setup Keyboard Input
@@ -106,16 +105,59 @@ class BoidController {
             b.target = t
             this.instances.push(b)
         }
+
+        // let b = new Boid(w/4, h/2, 30, 30)
+        // b.target = t
+        // this.instances.push(b)
+
+        // b = new Boid(w*3/4, h/2, 30, 30)
+        // b.target = t
+        // this.instances.push(b)
     }
 
     draw() {
         this.instances.forEach(b => b.draw())
+        // this.instances.forEach(b => b.targetDebug()) // temp
     }
 
     move(w, h){
-        for (let i = 0; i < this.instances.length; i++) { 
-            this.instances[i].move(w, h)
+        for (let i = 0; i < this.instances.length; i++) { // each Boid
+            let b = this.instances[i]
+            
+            // Avoid
+            for (let j = 0; j < this.instances.length; j++) { // each Boid
+                if (j == i) continue // not itself
+                let o = this.instances[j]
+
+                let xdiff = b.x - o.x
+                let ydiff = b.y - o.y
+                let distance = Math.sqrt(xdiff*xdiff + ydiff*ydiff)
+
+                if (distance < b.field) {
+                    let fieldxtip = b.x + b.xdir*b.field
+                    let fieldytip = b.y + b.ydir*b.field
+
+                    let avoidx = o.x - fieldxtip
+                    let avoidy = o.y - fieldytip
+
+                    let avoidmag = Math.sqrt(avoidx*avoidx + avoidy*avoidy)
+                    b.avoidxdir = avoidx/avoidmag
+                    b.avoidydir = avoidy/avoidmag
+                    // console.log(avoidxdir, avoidydir)
+                    // b.x += b.avoidxdir*4
+                    // b.y += b.avoidydir*4
+                    
+                } else {
+                    // b.avoidxdir = b.xdir
+                    // b.avoidydir = b.ydir
+                }
+
+            }
+
+            b.move(w, h)
+
         }
+
     }
 }
 
@@ -131,14 +173,18 @@ class Boid {
         this.xdir = 1
         this.ydir = 1
 
-        this.xvel = 1
-        this.yvel = 1
-        this.accel = 0.4
+        this.avoidxdir = 0
+        this.avoidydir = 1
+
+        this.xvel = Math.random()*1
+        this.yvel = Math.random()*1
+        this.accel = 0.01
+
+        this.field = 100
 
         this.target = { x: 0, y: 0}
 
         this.color = '#ffd6cc'
-        this.randomLocation(w, h);
     }
 
     randomLocation(w, h) {
@@ -161,9 +207,16 @@ class Boid {
         ctx.lineTo(this.x - this.w/4*this.ydir, this.y + this.w/4*this.xdir)
         ctx.lineTo(this.x + this.w/4*this.ydir, this.y - this.w/4*this.xdir)
         ctx.fill();
+
+        ctx.color = "black"
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.field, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        this.avoidDebug()
     }
 
-    move(w, h) {
+    moveTarget(w, h) {
         let xdiff = this.target.x - this.x
         let ydiff = this.target.y - this.y
         let distance = Math.sqrt(xdiff*xdiff + ydiff*ydiff)
@@ -173,13 +226,17 @@ class Boid {
 
         this.xvel += this.accel*targetxdir
         this.yvel += this.accel*targetydir
+    }
+
+    move(w, h) {
+        // this.moveTarget(w, h); // Orbit around center
 
         this.calculateDir();
 
         this.x += this.xvel
         this.y += this.yvel
 
-        this.keepOnScreen(w, h)
+        this.wrapScreen(w, h)
     }
 
     calculateDir() {
@@ -190,9 +247,38 @@ class Boid {
         }
     }
 
+    wrapScreen(w, h) {
+        if (this.x > w + 2) this.x = 0
+        else if (this.x < -2) this.x = w
+        if (this.y > h + 2) this.y = 0
+        else if (this.y < -2) this.y = h
+    }
+
     keepOnScreen(w, h) {
         this.x = clamp(this.x, this.w/2 + 5, w - this.w/2 - 5)
         this.y = clamp(this.y, this.h/2 + 5, h - this.h/2 - 5)
+    }
+
+    targetDebug(w, h) {
+        // TARGET LINE
+        let xdiff = this.target.x - this.x
+        let ydiff = this.target.y - this.y
+        let distance = Math.sqrt(xdiff*xdiff + ydiff*ydiff)
+
+        let targetxdir = xdiff/distance
+        let targetydir = ydiff/distance
+        ctx.beginPath()
+        ctx.moveTo(this.x, this.y)
+        ctx.lineTo(this.x + targetxdir*this.field, this.y + targetydir*this.field)
+        ctx.stroke()
+    }
+
+    avoidDebug(w, h) {
+        // TARGET LINE
+        ctx.beginPath()
+        ctx.moveTo(this.x, this.y)
+        ctx.lineTo(this.x + this.avoidxdir*this.field, this.y + this.avoidydir*this.field)
+        ctx.stroke()
     }
 
     debug(w, h) {
@@ -208,17 +294,6 @@ class Boid {
         y += 20
         ctx.fillText("targetx, targety: " + this.target.x.toFixed(2) + " " + this.target.y.toFixed(2), x, y)
 
-        // TARGET LINE
-        let xdiff = this.target.x - this.x
-        let ydiff = this.target.y - this.y
-        let distance = Math.sqrt(xdiff*xdiff + ydiff*ydiff)
-
-        let targetxdir = xdiff/distance
-        let targetydir = ydiff/distance
-        ctx.beginPath()
-        ctx.moveTo(this.x, this.y)
-        ctx.lineTo(this.x + targetxdir*20, this.y + targetydir*20)
-        ctx.stroke()
     }
 }
 
