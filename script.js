@@ -1,42 +1,38 @@
-// REQUIRES: player.js io.js
+// Initialize -------------------------------- 
+
 const c = document.getElementById('canvas')
 const ctx = c.getContext('2d')
 
 // Clamp number between two values with the following line:
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
-let Boids, target
-let I
 
+let Boids, target
+const numBoids = 1000;
+
+let I // IO
+
+// Create Boids, target, and IO
 function Init() {
     let { w, h } = resizeWindow()
 
     target = new Target(w/2, h/2)
 
-    Boids = new BoidController(1000) // Number of Boids
+    Boids = new BoidController(numBoids) // Number of Boids
     Boids.spawn(w, h)
 
     // Setup Keyboard Input
     I = new IO()
     I.addKeyListeners();
 
-    loop()
+    loop() // main loop
 }
 
-function update() {
-    target.move(w, h, I.keyState)
-    Boids.move(w, h)
-}
+// Main Animation loop -------------------------------- 
 
-function draw(w, h) {
-    ctx.clearRect(0, h, w, h)
-    ctx.fillStyle = "white"
-    ctx.fillRect(0, 0, w, h)
-
-    target.draw()
-    Boids.draw(w, h)
-}
-
+//
+// Main Animation loop
+//
 function loop() {
     let { w, h } = resizeWindow()
 
@@ -46,6 +42,22 @@ function loop() {
     requestAnimationFrame(loop)
 }
 
+// Update instances
+function update() {
+    target.update(I.keyState)
+    Boids.update(w, h)
+}
+
+// Draw instanes to canvas
+function draw(w, h) {
+    ctx.fillStyle = "white"
+    ctx.fillRect(0, 0, w, h)
+
+    target.draw()
+    Boids.draw(w, h)
+}
+
+// Resize Window
 function resizeWindow() {
     ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
@@ -55,7 +67,19 @@ function resizeWindow() {
     return { w, h }
 }
 
+// Scene Objects ---------------------------------------
+
+//
+// Target(x, y)
+// x: spawn location x
+// y: spawn location y
+//
+// The target is a black dot that can be moved around
+// when passed user input. Boids collide with target
+// objects.
+//
 class Target {
+
     constructor(x, y) {
         this.x = x
         this.y = y
@@ -65,20 +89,13 @@ class Target {
         this.color = "black"
     }
 
-    randomLocation(w, h) {
-        if (w == null || h == null) {
-            w = 500
-            h = 500
-        }
-
-        let rand = Math.random()
-        this.x = rand*w
-        rand = Math.random()
-        this.y = rand*h
-
-    }
-
-    move(w, h, dir) {
+    //
+    // Move Target in given direction if given input object literal
+    // Pre: dir is a valid direction object literal
+    // dir: an object literal containing the 4 boolaen directions
+    //      ideally (IO.keyState)
+    //
+    update(dir) {
         if (dir.right) this.x += 15
         if (dir.left) this.x -= 15
         if (dir.up) this.y -= 15
@@ -86,16 +103,43 @@ class Target {
 
     }
 
+    //
+    // Draws Target to canvas
+    //
     draw() {
         ctx.color = this.color
         ctx.fillStyle = this.color
         ctx.beginPath()
         ctx.arc(this.x, this.y, this.w, 0, 2 * Math.PI)
         ctx.fill()
-        // ctx.stroke()
     }
+
+    // Helper Functions --------------------------------
+
+    //
+    // Randomize X and y position
+    // Pre: w and h are not null
+    // w: screen width
+    // h: screen height
+    //
+    randomLocation(w, h) {
+        if (w == null || h == null)
+            throw 'ERROR: Target randomLocation(w, h): w or h is undefined'
+
+        this.x = Math.random()*w
+        this.y = Math.random()*h
+    }
+
 }
 
+//
+// BoidController(maxInst)
+// maxInst: maiximum number of instances
+//
+// Controls all Boid instances on the screen, 3 main
+// purposes: spawn (create) all instances, draw all 
+// instances, and move all instances.
+//
 class BoidController {
 
     constructor(maxInst){
@@ -103,123 +147,112 @@ class BoidController {
         this.maxInst = maxInst
     }
 
+    //
+    // Spawns all Boid Instances at random locations
+    // Pre: w and h are not null
+    //
     spawn(w, h) {
+        if (w == null || h == null)
+            throw 'ERROR: BoidController spawn(w, h): w or h is undefined'
+
         for (let i = 0; i < this.maxInst; i++) { 
-            let b = new Boid(10, 10, 30, 30)
+            let b = new Boid(10, 10, 30)
             b.randomLocation(w, h)
-            b.target = target
+            b.target = target // ugly, watch out for this
             this.boids.push(b)
         }
     }
 
+    //
+    // Calls Move for each Boid Instance
+    // Pre: w and h are not null
+    //
+    update(w, h) {
+        if (w == null || h == null)
+            throw 'ERROR: BoidController update(w, h): w or h is undefined'
+
+        this.boids.forEach(b => b.update(w, h, this.boids))
+    }
+
+    //
+    // Draws all Boid Instanes to the screen
+    // Pre: w and h are not null
+    //
     draw(w, h) {
+        if (w == null || h == null)
+            throw 'ERROR: BoidController draw(w, h): w or h is undefined'
+
         this.boids.forEach(b => b.draw(w, h))
-        // this.instances.forEach(b => b.targetDebug()) // temp
     }
-
-    move(w, h) {
-        this.boids.forEach(b => b.move(w, h, this.boids))
-    }
-
-    // move(w, h){
-    //     for (let i = 0; i < this.boids.length; i++) { // each Boid
-    //         let b = this.boids[i]
-    //         b.target.x = 0 
-    //         b.target.y = 0 
-    //         let infield = 0
-            
-    //                 let avoidx = b.x - o.x
-    //                 let avoidy = b.y - o.y
-    //         // Avoid
-    //         for (let j = 0; j < this.instances.length; j++) { // each Boid
-    //             if (j == i) continue // not itself
-    //             let o = this.instances[j]
-
-    //             let xdiff = b.x - o.x
-    //             let ydiff = b.y - o.y
-    //             let distance = Math.sqrt(xdiff*xdiff + ydiff*ydiff)
-
-    //             if (distance < b.field) {
-    //                 b.target.x += o.x
-    //                 b.target.y += o.y
-    //                 infield++;
-
-
-    //                 // Move in same direction
-    //                 let subx = o.xdir - b.xdir
-    //                 let suby = o.ydir - b.ydir
-    //                 b.xdir += subx*matchingFactor
-    //                 b.ydir += suby*matchingFactor
-    //                 b.normalizeDir()
-
-    //                 // Calculate angle
-    //                 let d = b.xdir*(xdiff/distance) + b.ydir*(ydiff/distance)
-    //                 let angle = Math.acos(d)
-    //                 if (angle < b.peripheral) continue // skip bc behind
-
-    //                 // Avoid
-
-    //                 b.xdir -= avoidxdir*matchingFactor
-    //                 b.ydir -= avoidydir*matchingFactor
-    //                 b.normalizeDir()
-
-    //                 o.avoidDebug(w, h, avoidxdir, avoidydir)
-    //             }
-    //         }
-
-    //         if (infield > 0) b.target.x /= infield
-    //         if (infield > 0) b.target.y /= infield
-    //         b.move(w, h)
-
-    //     }
-
-    // }
 }
 
+//
+// Boid(x, y, w, h)
+// x: spawn location x
+// y: spawn location y
+// w: size of boid
+//
+// A Boid, little arrow guy that flocks like birds.
+// Dictated by three rules: coherence, separation,
+// alignment.
+//
 class Boid {
-    constructor(x, y, w, h) {
+
+    constructor(x, y, w) {
         this.x = x
         this.y = y
-        this.w = w
+        this.w = w + 20*Math.random() // varry in size
 
-        this.angle = 0 // radians
-
-        this.dy = 1
-        this.dx = 0
+        this.dx = 0 // velocity x component
+        this.dy = 1 // velocity y component
 
         this.maxSpeed = 15
         this.field = 200
-
         this.minSeperation = 40
 
-        this.peripheral = 1.6 //angle
-
-        this.centeringFactor = 0.005
-        this.avoidFactor = 0.05
-        this.matchFactor = 0.05
+        this.centeringFactor = 0.005 // scalar of force to push to center
+        this.avoidFactor = 0.05      // scalar of force to avoid
+        this.matchFactor = 0.05      // scalar of force to match directions
 
         this.target = { x:0, y:0, w:0 }
         this.color = '#ffd6cc'
     }
 
-    randomLocation(w, h) {
-        if (w == null || h == null) {
-            w = 500
-            h = 500
-        }
+    //
+    // Draw Boid to canvas
+    // Pre: w and h and boids are not null
+    // w: screen width
+    // h: screen height
+    // boids: array of Boid instances
+    //
+    update(w, h, boids) {
+        if (w == null || h == null || boids == null)
+            throw 'ERROR: Boid update(w, h, boids): w or h or boids is undefined'
 
-        let rand = Math.random()
-        this.x = rand*w
-        rand = Math.random()
-        this.y = rand*h
+        this.avoidOthers(boids) // Seperation
+        this.matchVelocity(boids) // Alignment
+        this.moveCenter(boids) // Cohesion
 
+        this.avoidTarget()
+
+        this.limitSpeed(boids)
+        this.pushOnScreen(w, h)
+
+        // Update positions
+        this.x += this.dx
+        this.y += this.dy
     }
 
-    getColor(w, h) {
-        return `rgb(${(this.x/w)*255}, ${(this.y/h)*255}, ${(this.x/(w*2) + this.y/(h*2))*255})`
-    }
-
+    //
+    // Draw Boid to canvas
+    // Pre: w and h are not null
+    // w: screen width
+    // h: screen height
+    //
     draw(w, h) {
+        if (w == null || h == null)
+            throw 'ERROR: Boid draw(w, h): w or h is undefined'
+
         const mag = Math.sqrt(this.dx*this.dx + this.dy*this.dy)
         const xdir = this.dx/mag
         const ydir = this.dy/mag
@@ -231,29 +264,53 @@ class Boid {
         ctx.lineTo(this.x + this.w/4*ydir, this.y - this.w/4*xdir)
         ctx.fill();
 
+        // Debug ---
+
+        // Direction Line Indicator
         // this.targetDebug(xdir, ydir)
+
+        // Field Circle Indicator
         // ctx.color = "black"
         // ctx.beginPath();
         // ctx.arc(this.x, this.y, this.field, 0, 2 * Math.PI);
         // ctx.stroke();
     }
 
-    avoidTarget() {
-        let d = this.distance(this.target)
-        if (d < this.target.w*2) {
-            this.dx -= (this.target.x - this.x)
-            this.dy -= (this.target.y - this.y)
+    // Velocity Updaters ------------------------
+
+    // 
+    // Push for a minimum seperation from other Boids (seperation)
+    // pre: boids is not null
+    // boids: array of Boid instances
+    //
+    avoidOthers(boids) {
+        if (boids == null)
+            throw 'ERROR: Boid avoidOthers(boids): boids is undefined'
+
+        let moveX = 0;
+        let moveY = 0;
+        for (let otherBoid of boids) {
+            if (otherBoid !== this) {
+                if (this.distance(otherBoid) < this.minSeperation) {
+                    moveX += this.x - otherBoid.x
+                    moveY += this.y - otherBoid.y
+                }
+            }
         }
+
+        this.dx += moveX*this.avoidFactor
+        this.dy += moveY*this.avoidFactor
     }
 
-    distance(otherBoid) {
-        let diffx = this.x - otherBoid.x
-        let diffy = this.y - otherBoid.y
-
-        return Math.sqrt(diffx*diffx + diffy*diffy)
-    }
-
+    //
+    // Move in same direction as other boids (alignment)
+    // Pre: boids is not null
+    // boids: all boid instances
+    //
     matchVelocity(boids) {
+        if (boids == null)
+            throw 'ERROR: Boid matchVelocity(boids): boids is undefined'
+
         let avgdx = 0
         let avgdy = 0
         let neighbors = 0
@@ -265,6 +322,7 @@ class Boid {
             }
         }
 
+        // Compute averages and update velocity
         if (neighbors) {
             avgdx /= neighbors;
             avgdy /= neighbors;
@@ -274,7 +332,13 @@ class Boid {
         }
     }
 
+    //
+    // Move towards center of field (cohesion)
+    //
     moveCenter(boids) {
+        if (boids == null)
+            throw 'ERROR: Boid matchVelocity(boids): boids is undefined'
+
         let centerX = 0
         let centerY = 0
         let neighbors = 0;
@@ -296,35 +360,122 @@ class Boid {
         }
     }
 
-    avoidOthers(boids) {
-        let moveX = 0;
-        let moveY = 0;
-        for (let otherBoid of boids) {
-            if (otherBoid !== this) {
-                if (this.distance(otherBoid) < this.minSeperation) {
-                    moveX += this.x - otherBoid.x
-                    moveY += this.y - otherBoid.y
-                }
-            }
+    // 
+    // Push Boid away from this.target
+    // Pre: target property is not null
+    //
+    avoidTarget() {
+        if (this.target == null)
+            throw 'ERROR: Boid avoidTarget(): this.target is undefined'
+
+        let d = this.distance(this.target)
+        if (d < this.target.w*2) {
+            this.dx -= (this.target.x - this.x)
+            this.dy -= (this.target.y - this.y)
         }
-
-        this.dx += moveX*this.avoidFactor
-        this.dy += moveY*this.avoidFactor
     }
 
-    move(w, h, boids) {
-        this.matchVelocity(boids)
-        this.avoidOthers(boids)
-        this.avoidTarget()
-        this.moveCenter(boids)
-        this.limitSpeed(boids)
-        this.pushOnScreen(w, h)
-        // this.wrapScreen(w, h)
+    // Screen Border Rules ------------------------------
 
-        this.x += this.dx
-        this.y += this.dy
+    //
+    // Move from one offscreen one side onto the other
+    // Pre: w and h are not null
+    // w: screen width
+    // h: screen height
+    //
+    wrapScreen(w, h) {
+        if (w == null || h == null)
+            throw 'ERROR: Boid wrapScreen(w, h): w or h is undefined'
+
+        if (this.x > w + 2) this.x = 0
+        else if (this.x < -2) this.x = w
+        if (this.y > h + 2) this.y = 0
+        else if (this.y < -2) this.y = h
     }
 
+    //
+    // Push away from screen edge if within margin
+    // Pre: w and h are not null
+    // w: screen width
+    // h: screen height
+    //
+    pushOnScreen(w, h) {
+        if (w == null || h == null)
+            throw 'ERROR: Boid pushOnScreen(w, h): w or h is undefined'
+
+        const margin = 150
+        const turnFactor = 2 
+
+        if (this.x < margin) this.dx += turnFactor
+        if (this.x > w - margin) this.dx -= turnFactor
+        if (this.y < margin) this.dy += turnFactor
+        if (this.y > h - margin) this.dy -= turnFactor
+    }
+
+    //
+    // Don't let X and Y exceed screen limits
+    // Pre: w and h are not null
+    // w: screen width
+    // h: screen height
+    //
+    lockOnScreen(w, h) {
+        if (w == null || h == null)
+            throw 'ERROR: Boid lockOnScreen(w, h): w or h is undefined'
+
+        this.x = clamp(this.x, this.w/2 + 5, w - this.w/2 - 5)
+        this.y = clamp(this.y, this.h/2 + 5, h - this.h/2 - 5)
+    }
+
+    // Helper Functions --------------------------------
+
+    //
+    // Calculate Distance from an object
+    // Pre: other is not null
+    // other: instance containing properties x and y
+    //
+    distance(other) {
+        if (other == null)
+            throw 'ERROR: Boid distance(other): other is undefined'
+
+        let diffx = this.x - other.x
+        let diffy = this.y - other.y
+
+        return Math.sqrt(diffx*diffx + diffy*diffy)
+    }
+
+    // 
+    // Return a color based on the position relative to the screen
+    // Pre: w and h are not null
+    // w: screen width
+    // h: screen height
+    //
+    getColor(w, h) {
+        if (w == null || h == null)
+            throw 'ERROR: Boid getColor(w, h): w or h is undefined'
+
+        return `rgb(${(this.x/w)*255}, ${(this.y/h)*255}, ${(this.x/(w*2) + this.y/(h*2))*255})`
+    }
+
+    //
+    // Randomize X and y position
+    // Pre: w and h are not null
+    // w: screen width
+    // h: screen height
+    //
+    randomLocation(w, h) {
+        if (w == null || h == null)
+            throw 'ERROR: Boid randomLocation(w, h): w or h is undefined'
+
+        let rand = Math.random()
+        this.x = rand*w
+        rand = Math.random()
+        this.y = rand*h
+
+    }
+
+    // 
+    // Bound speed to maxSpeed
+    //
     limitSpeed() {
         const speed = Math.sqrt(this.dx*this.dx + this.dy*this.dy)
 
@@ -334,48 +485,25 @@ class Boid {
         }
     }
 
-    wrapScreen(w, h) {
-        if (this.x > w + 2) this.x = 0
-        else if (this.x < -2) this.x = w
-        if (this.y > h + 2) this.y = 0
-        else if (this.y < -2) this.y = h
-    }
+    // Debug Functions --------------------------------
 
-    pushOnScreen(w, h) {
-        const margin = 400
-        const turnFactor = 2 
-
-        if (this.x < margin) this.dx += turnFactor
-        if (this.x > w - margin) this.dx -= turnFactor
-        if (this.y < margin) this.dy += turnFactor
-        if (this.y > h - margin) this.dy -= turnFactor
-    }
-
-    lockOnScreen(w, h) {
-        this.x = clamp(this.x, this.w/2 + 5, w - this.w/2 - 5)
-        this.y = clamp(this.y, this.h/2 + 5, h - this.h/2 - 5)
-    }
-
+    // 
+    // Draw Direction vector
+    // xdir: normalized xcomponent
+    // ydir: normalized ycomponent
+    //
     targetDebug(xdir, ydir) {
-        // TARGET LINE
         ctx.beginPath()
         ctx.moveTo(this.x, this.y)
         ctx.lineTo(this.x + xdir*this.field, this.y + ydir*this.field)
         ctx.stroke()
     }
 
-    avoidDebug(w, h) {
-        // TARGET LINE
-        // ctx.color = 'black'
-        // let angle = Math.acos(this.xdir*1)
-        // let xdir = Math.cos(this.peripheral + angle)
-        // let ydir = Math.sin(this.peripheral + angle)
-        // ctx.beginPath()
-        // ctx.moveTo(this.x, this.y)
-        // ctx.lineTo(this.x + xdir*this.field, this.y + ydir*this.field)
-        // ctx.stroke()
-    }
-
+    // 
+    // Draw properties of Boid to canvas
+    // w: screen width
+    // h: screen height
+    //
     debug(w, h) {
         ctx.font = "20px Arial Bold"
         ctx.color = "black"
@@ -388,10 +516,14 @@ class Boid {
         ctx.fillText("xvel, yvel: " + this.xvel.toFixed(2) + " " + this.yvel.toFixed(2), x, y)
         y += 20
         ctx.fillText("targetx, targety: " + this.target.x.toFixed(2) + " " + this.target.y.toFixed(2), x, y)
-
     }
 }
 
+//
+// IO()
+//
+// Input handler, handles mouse and keyboard events.
+//
 class IO {
 
     constructor() {
@@ -399,6 +531,8 @@ class IO {
         this.ymouse = 0
         this.mouseDown = false
 
+        // keyState is passed to other functions that
+        // rely on key events
         this.keyState = {
             right: false,
             up: false,
@@ -432,38 +566,54 @@ class IO {
 
     }
 
+    // 
+    // Update keyState property to true (down) for given e keycode
+    // according to keyMap
+    // e: event
+    //
+    keyDownHandler(e) {
+        let key = I.keyMap[e.keyCode]
+        I.keyState[key] = true
+    }
 
+    // 
+    // Update keyState property to false (up) for given e keycode
+    // according to keyMap
+    // e: event
+    //
+    keyUpHandler(e) {
+        let key = I.keyMap[e.keyCode]
+        I.keyState[key] = false
+    }
+
+    // 
+    // Update Mouse position
+    //
+    mousePosition(event) {
+        I.xmouse = event.x - c.offsetLeft
+        I.ymouse = event.y - c.offsetTop
+        I.mouseDown = true
+    }
+
+    //
+    // Add Keyboard Event Listeners
+    //
     addKeyListeners() {
         document.addEventListener("keydown", this.keyDownHandler, false);
         document.addEventListener("keyup", this.keyUpHandler, false);
     }
 
-    keyDownHandler(e) {
-        let key = I.keyMap[e.keyCode] // THIS IS HORRENDOUS
-        I.keyState[key] = true // ALSO THIS (I reference)
-        // if (e.keyCode == 77 && monce) muteSound(); //Mute
-        // else if (e.keyCode == 88 && cool === 0 && power > 0) attackx = true; //Special Regenerate
-    }
-
-    keyUpHandler(e) {
-        let key = I.keyMap[e.keyCode] // THIS IS HORRENDOUS AS AWELL
-        I.keyState[key] = false // GOD HELP ME
-    }
-
-    mousePosition(event) {
-        I.xmouse = event.x - c.offsetLeft // ALSO BAD
-        I.ymouse = event.y - c.offsetTop // REAL BAD
-        I.mouseDown = true
-
-    }
-
+    //
+    // Add Mouse Event Listeners
+    //
     addMouseListener() {
         document.addEventListener("click", this.mousePosition, false);
     }
 }
 
-
+//
+// Initalize when page loaded
+//
 window.addEventListener('DOMContentLoaded', () => {
     Init()
 })
-
