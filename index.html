@@ -10,17 +10,17 @@
 			}
 		</style>
     </head>
-
     <!-- DEVELOPED BY ZACK TRACZYK -->
-    
-    <!-- <body onload="Menu.draw(G.w, G.h)"> -->
-    <!-- <body onload="menu()"> -->
+	<script type="importmap">
+		{
+			"imports": {
+				"three": "./src/three.module.js",
+				"Boid": "./src/boid.js"
+			}
+		}
+	</script>
     <body>
-
-        <div id="container">
-            <canvas id="canvas" width="500" height="500"></canvas>
-        </div>
-        <script type="text/javascript" src='script.js'></script>
+        <script type="module" src='./src/main.js'></script>
     </body>
 
 </html>
