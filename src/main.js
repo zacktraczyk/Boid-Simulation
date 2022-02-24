@@ -1,21 +1,27 @@
 import * as THREE from 'three';
 
 let camera, scene, renderer;
-let cube;
+let mesh;
 
 function Init() {
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10);
-    camera.position.set(0, 3.5, 5);
+    camera.position.set(2.5, 2, 2);
     camera.lookAt(scene.position);
 
-    const geometry = new THREE.BoxGeometry(2, 2, 2);
+    const geometry = new THREE.ConeGeometry(0.1, 0.3, 3);
     const material = new THREE.MeshNormalMaterial();
 
-    cube = new THREE.Mesh(geometry, material);
+    mesh = new THREE.Mesh(geometry, material);
 
-    scene.add(cube);
+    scene.add( mesh );
+
+    const geo = new THREE.EdgesGeometry( new THREE.BoxGeometry(2, 2, 2) ); // or WireframeGeometry( geometry )
+    const mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
+    const wireframe = new THREE.LineSegments( geo, mat );
+
+    scene.add( wireframe );
 
     renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -36,8 +42,8 @@ function onWindowResize() {
 
 function animate() {
 
-    cube.rotation.x += 0.005;
-    cube.rotation.y += 0.01;
+    mesh.rotation.x += 0.005;
+    mesh.rotation.y += 0.01;
 
     renderer.render( scene, camera );
     requestAnimationFrame( animate );
