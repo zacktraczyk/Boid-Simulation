@@ -14,15 +14,15 @@ export class Boid {
         this.vel = new THREE.Vector3().randomDirection();
 
         this.maxSpeed = 0.02
-        this.field = 200
-        this.minSeperation = 40
+        // this.field = 200
+        // this.minSeperation = 40
 
-        this.centeringFactor = 0.005 // scalar of force to push to center
-        this.avoidFactor = 0.05      // scalar of force to avoid
-        this.matchFactor = 0.05      // scalar of force to match directions
+        // this.centeringFactor = 0.005 // scalar of force to push to center
+        // this.avoidFactor = 0.05      // scalar of force to avoid
+        // this.matchFactor = 0.05      // scalar of force to match directions
 
-        this.target = { x:0, y:0, w:0 }
-        this.color = '#ffd6cc'
+        // this.target = { x:0, y:0, w:0 }
+        // this.color = '#ffd6cc'
     }
 
     //
@@ -281,9 +281,9 @@ export class Boid {
         // <p>Distance to other Boid: ${this.distance(other).toFixed(3)}</p>
         debug.innerHTML = 
 `<h3 style="text-align:center;text-decoration:underline">DEBUG</h3>
-<p>Velocity: \<${this.vel.x.toFixed(3)} ${this.vel.y.toFixed(3)}, ${this.vel.z.toFixed(3)}\></p>
+<p>Velocity: \<${this.vel.x.toFixed(3)}, ${this.vel.y.toFixed(3)}, ${this.vel.z.toFixed(3)}\></p>
 <p>Speed: ${this.vel.length().toFixed(3)}</p>
-<p>Position: \<${this.mesh.position.x.toFixed(3)} ${this.mesh.position.y.toFixed(3)}, ${this.mesh.position.z.toFixed(3)}\></p>
+<p>Position: \<${this.mesh.position.x.toFixed(3)}, ${this.mesh.position.y.toFixed(3)}, ${this.mesh.position.z.toFixed(3)}\></p>
 `;
     }
 }
