@@ -8,6 +8,17 @@
 				height: 100%;
 				overflow: hidden;
 			}
+
+            #debug {
+                color: white;
+                position: fixed;
+                bottom: 50px;
+                left: 50px;
+                z-index: 100;
+                display:block;
+                width: 25%;
+                padding: 10px;
+            }
 		</style>
     </head>
     <!-- DEVELOPED BY ZACK TRACZYK -->
@@ -15,11 +26,13 @@
 		{
 			"imports": {
 				"three": "./src/three.module.js",
-				"Boid": "./src/boid.js"
+				"boid": "./src/boid.js",
+                "trackballControls": "./src/TrackballControls.js"
 			}
 		}
 	</script>
     <body>
+        <div id="debug"></div>
         <script type="module" src='./src/main.js'></script>
     </body>
 
