@@ -3,7 +3,7 @@ import { BoidController } from 'boid';
 import { TrackballControls } from 'trackballControls';
 
 // Options
-const maxBoids = 100; // Change Boid Instances
+const maxBoids = 300; // Change Boid Instances
 const debug = true;   // Enable Debug
 
 // Global
@@ -37,7 +37,7 @@ function Init() {
     const geo = new THREE.EdgesGeometry( box ); // or WireframeGeometry( geometry )
     const mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
     boundary = new THREE.LineSegments( geo, mat );
-    // scene.add(boundary); // Render
+    if (debug) scene.add(boundary); // Render
 
     // Initalize Boids
     boids = new BoidController(scene, boundary, maxBoids);

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-const geometry = new THREE.ConeGeometry(0.05, 0.2, 3);
+const geometry = new THREE.ConeGeometry(0.02, 0.08, 3);
 const material = new THREE.MeshNormalMaterial();
 
 export class Boid {
@@ -13,38 +13,32 @@ export class Boid {
         // Randomize velocity
         this.vel = new THREE.Vector3().randomDirection();
 
-        this.maxSpeed = 0.02
-        // this.field = 200
-        // this.minSeperation = 40
+        this.maxSpeed = 0.02;
+        // this.field = 1;
+        this.field = 0.5;
+        this.minSeperation = 0.08;
 
-        // this.centeringFactor = 0.005 // scalar of force to push to center
-        // this.avoidFactor = 0.05      // scalar of force to avoid
-        // this.matchFactor = 0.05      // scalar of force to match directions
-
-        // this.target = { x:0, y:0, w:0 }
-        // this.color = '#ffd6cc'
+        this.centeringFactor = 0.0005 // scalar of force to push to center
+        this.avoidFactor = 0.05;      // scalar of force to avoid
+        this.matchFactor = 0.05;      // scalar of force to match directions
     }
 
     //
     // Draw Boid to canvas
-    // Pre: w and h and boids are not null
-    // w: screen width
-    // h: screen height
+    // boundary: a mesh that contains Boid
     // boids: array of Boid instances
     //
     // update(w, h, boids) {
     update(boundary, boids) {
-        // this.avoidOthers(boids) // Seperation
-        // this.matchVelocity(boids) // Alignment
-        // this.moveCenter(boids) // Cohesion
-
-        // this.avoidTarget()
+        this.avoidOthers(boids)   // Seperation
+        this.matchVelocity(boids) // Alignment
+        this.moveCenter(boids)    // Cohesion
 
         this.limitSpeed()
         this.pushOnScreen(boundary)
 
         // Update positions
-        this.mesh.position.addScaledVector(this.vel, 1.01);
+        this.mesh.position.addScaledVector(this.vel, 1);
 
         // Update direction
         const axis = new THREE.Vector3(0, 1, 0);
@@ -58,97 +52,95 @@ export class Boid {
     // pre: boids is not null
     // boids: array of Boid instances
     //
-    // avoidOthers(boids) {
-    //     if (boids == null)
-    //         throw 'ERROR: Boid avoidOthers(boids): boids is undefined'
+    avoidOthers(boids) {
+        if (boids == null)
+            throw 'ERROR: Boid avoidOthers(boids): boids is undefined'
 
-    //     let moveX = 0;
-    //     let moveY = 0;
-    //     for (let otherBoid of boids) {
-    //         if (otherBoid !== this) {
-    //             if (this.distance(otherBoid) < this.minSeperation) {
-    //                 moveX += this.x - otherBoid.x
-    //                 moveY += this.y - otherBoid.y
-    //             }
-    //         }
-    //     }
+        let moveX = 0;
+        let moveY = 0;
+        let moveZ = 0;
+        for (let otherBoid of boids) {
+            if (otherBoid !== this) {
+                if (this.distance(otherBoid) < this.minSeperation) {
+                    moveX += this.vel.x - otherBoid.vel.x
+                    moveY += this.vel.y - otherBoid.vel.y
+                    moveZ += this.vel.z - otherBoid.vel.z
+                }
+            }
+        }
 
-    //     this.dx += moveX*this.avoidFactor
-    //     this.dy += moveY*this.avoidFactor
-    // }
+        this.vel.x += moveX*this.avoidFactor
+        this.vel.y += moveY*this.avoidFactor
+        this.vel.z += moveZ*this.avoidFactor
+    }
 
     //
     // Move in same direction as other boids (alignment)
     // Pre: boids is not null
     // boids: all boid instances
     //
-    // matchVelocity(boids) {
-    //     if (boids == null)
-    //         throw 'ERROR: Boid matchVelocity(boids): boids is undefined'
+    matchVelocity(boids) {
+        if (boids == null)
+            throw 'ERROR: Boid matchVelocity(boids): boids is undefined'
 
-    //     let avgdx = 0
-    //     let avgdy = 0
-    //     let neighbors = 0
-    //     for (let otherBoid of boids) {
-    //         if (this.distance(otherBoid) < this.field) {
-    //             avgdx += otherBoid.dx
-    //             avgdy += otherBoid.dy
-    //             neighbors++
-    //         }
-    //     }
+        let avgdx = 0
+        let avgdy = 0
+        let avgdz = 0
+        let neighbors = 0
+        for (let otherBoid of boids) {
+            if (this.distance(otherBoid) < this.field) {
+                avgdx += otherBoid.vel.x
+                avgdy += otherBoid.vel.y
+                avgdz += otherBoid.vel.z
+                neighbors++
+            }
+        }
 
-    //     // Compute averages and update velocity
-    //     if (neighbors) {
-    //         avgdx /= neighbors;
-    //         avgdy /= neighbors;
+        // Compute averages and update velocity
+        if (neighbors) {
+            avgdx /= neighbors;
+            avgdy /= neighbors;
+            avgdz /= neighbors;
 
-    //         this.dx += (avgdx - this.dx)*this.matchFactor
-    //         this.dy += (avgdy - this.dy)*this.matchFactor
-    //     }
-    // }
+            this.vel.x += avgdx*this.matchFactor
+            this.vel.y += avgdy*this.matchFactor
+            this.vel.z += avgdz*this.matchFactor
+        }
+    }
 
     //
     // Move towards center of field (cohesion)
     //
-    // moveCenter(boids) {
-    //     if (boids == null)
-    //         throw 'ERROR: Boid matchVelocity(boids): boids is undefined'
+    moveCenter(boids) {
+        if (boids == null)
+            throw 'ERROR: Boid matchVelocity(boids): boids is undefined'
 
-    //     let centerX = 0
-    //     let centerY = 0
-    //     let neighbors = 0;
+        let centerX = 0
+        let centerY = 0
+        let centerZ = 0
+        let neighbors = 0;
 
-    //     for (let otherBoid of boids) {
-    //         if (this.distance(otherBoid) < this.field) {
-    //             centerX += otherBoid.x
-    //             centerY += otherBoid.y
-    //             neighbors++
-    //         }
-    //     }
+        for (let otherBoid of boids) {
+            if (this.distance(otherBoid) < this.field) {
+                centerX += otherBoid.mesh.position.x
+                centerY += otherBoid.mesh.position.y
+                centerZ += otherBoid.mesh.position.z
+                neighbors++
+            }
+        }
 
-    //     if (neighbors) {
-    //         centerX /= neighbors
-    //         centerY /= neighbors
+        if (neighbors) {
+            centerX /= neighbors
+            centerY /= neighbors
+            centerZ /= neighbors
 
-    //         this.dx += (centerX - this.x) * this.centeringFactor;
-    //         this.dy += (centerY - this.y) * this.centeringFactor;
-    //     }
-    // }
+            console.log(centerX, centerY, centerZ);
 
-    // 
-    // Push Boid away from this.target
-    // Pre: target property is not null
-    //
-    // avoidTarget() {
-    //     if (this.target == null)
-    //         throw 'ERROR: Boid avoidTarget(): this.target is undefined'
-
-    //     let d = this.distance(this.target)
-    //     if (d < this.target.w*2) {
-    //         this.dx -= (this.target.x - this.x)
-    //         this.dy -= (this.target.y - this.y)
-    //     }
-    // }
+            this.vel.x += (centerX - this.mesh.position.x) * this.centeringFactor;
+            this.vel.y += (centerY - this.mesh.position.y) * this.centeringFactor;
+            this.vel.z += (centerZ - this.mesh.position.z) * this.centeringFactor;
+        }
+    }
 
     // Screen Border Rules ------------------------------
 
@@ -166,8 +158,10 @@ export class Boid {
 
         if (this.mesh.position.x > origin.x + size.x) this.mesh.position.x = origin.x;
         else if (this.mesh.position.x < origin.x) this.mesh.position.x = origin.x + size.x;
+
         if (this.mesh.position.y > origin.y + size.y) this.mesh.position.y = origin.y;
         else if (this.mesh.position.y < origin.y) this.mesh.position.y = origin.y + size.y;
+
         if (this.mesh.position.z > origin.z + size.z) this.mesh.position.z = origin.z;
         else if (this.mesh.position.z < origin.z) this.mesh.position.z = origin.z + size.z;
     }
@@ -189,12 +183,17 @@ export class Boid {
 
         // <++> NOTE: Should be using ThreeJS Methods to do this more simply
         // this.vel.addScaledVector( away from cube, turn factor);
+        // x component
         if (this.mesh.position.x < origin.x + margin) this.vel.x += turnFactor;
-        if (this.mesh.position.x > origin.x + size.x - margin) this.vel.x -= turnFactor;
+        else if (this.mesh.position.x > origin.x + size.x - margin) this.vel.x -= turnFactor;
+
+        // y component
         if (this.mesh.position.y < origin.y + margin) this.vel.y += turnFactor;
-        if (this.mesh.position.y > origin.y + size.y - margin) this.vel.y -= turnFactor;
+        else if (this.mesh.position.y > origin.y + size.y - margin) this.vel.y -= turnFactor;
+
+        // z component
         if (this.mesh.position.z < origin.z + margin) this.vel.z += turnFactor;
-        if (this.mesh.position.z > origin.z + size.z - margin) this.vel.z -= turnFactor;
+        else if (this.mesh.position.z > origin.z + size.z - margin) this.vel.z -= turnFactor;
 
 
     }
@@ -212,19 +211,6 @@ export class Boid {
 
         return this.mesh.position.distanceTo(other.mesh.position);
     }
-
-    // 
-    // Return a color based on the position relative to the screen
-    // Pre: w and h are not null
-    // w: screen width
-    // h: screen height
-    //
-    // getColor(w, h) {
-    //     if (w == null || h == null)
-    //         throw 'ERROR: Boid getColor(w, h): w or h is undefined'
-
-    //     return `rgb(${(this.x/w)*255}, ${(this.y/h)*255}, ${(this.x/(w*2) + this.y/(h*2))*255})`
-    // }
 
     //
     // Randomize X and y position inside a given mesh
@@ -275,10 +261,9 @@ export class Boid {
     // w: screen width
     // h: screen height
     //
-    debug(other) {
+    debug() {
         const debug = document.getElementById("debug");
         this.mesh.material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-        // <p>Distance to other Boid: ${this.distance(other).toFixed(3)}</p>
         debug.innerHTML = 
 `<h3 style="text-align:center;text-decoration:underline">DEBUG</h3>
 <p>Velocity: \<${this.vel.x.toFixed(3)}, ${this.vel.y.toFixed(3)}, ${this.vel.z.toFixed(3)}\></p>
@@ -303,7 +288,7 @@ export class BoidController {
 
     //
     // Spawns all Boid Instances at random locations
-    // Pre: w and h are not null
+    // Pre: this._scene and this._boundary is defined
     //
     spawn() {
         if (this._scene === undefined)
@@ -327,18 +312,18 @@ export class BoidController {
 
     //
     // Calls Move for each Boid Instance
-    // Pre: w and h are not null
+    // Pre: this._boundary is defined
     //
     update() {
-        // if (w == null || h == null)
-        //     throw 'ERROR: BoidController update(w, h): w or h is undefined'
+        if (this._boundary === undefined)
+            throw 'ERROR: BoidController spawn(w, h): this._boundary is undefined'
 
         this.boids.forEach(b => {
             b.update(this._boundary, this.boids);
         });
 
         if (this.debug) {
-            this._debugBoid.debug(this.boids[2]);
+            this._debugBoid.debug();
             this._debugBoid.dirDebug(this._boundary);
         }
     }
