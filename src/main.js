@@ -3,8 +3,8 @@ import { BoidController } from 'boid';
 import { TrackballControls } from 'trackballControls';
 
 // Options
-const maxBoids = 300; // Change Boid Instances
-const debug = true;   // Enable Debug
+const maxBoids = 600; // Change Boid Instances
+const debug = false;   // Enable Debug
 
 // Global
 let camera, scene, renderer;
@@ -31,6 +31,12 @@ function Init() {
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10);
     camera.position.set(2.5, 2, 2);
     camera.lookAt(scene.position);
+
+    // light
+    const color = 0x000000;  // black
+    const near = 0;
+    const far = 8;
+    scene.fog = new THREE.Fog(color, near, far);
 
     // Boundary
     const box = new THREE.BoxGeometry(3, 3, 3); 

@@ -1,26 +1,32 @@
 import * as THREE from 'three';
+const geometry = new THREE.BoxGeometry(0.05, 0.2, 0.05);    // Boid Geometry
+const material = new THREE.MeshBasicMaterial();             // Boid Material
 
-const geometry = new THREE.ConeGeometry(0.02, 0.08, 3);
-const material = new THREE.MeshNormalMaterial();
 
+//
+// A single Boid
+//
 export class Boid {
 
     constructor(x, y, z) {
         // Create Mesh
-        this.mesh = new THREE.Mesh(geometry, material);
-            this.mesh.position.set(x, y, z);
+        this.mesh = new THREE.Mesh( geometry, material);
+        this.mesh.position.set(x, y, z);
 
         // Randomize velocity
         this.vel = new THREE.Vector3().randomDirection();
 
         this.maxSpeed = 0.02;
-        // this.field = 1;
         this.field = 0.5;
-        this.minSeperation = 0.08;
+        this.minSeperation = 0.1;
 
         this.centeringFactor = 0.0005 // scalar of force to push to center
         this.avoidFactor = 0.05;      // scalar of force to avoid
         this.matchFactor = 0.05;      // scalar of force to match directions
+
+        this.margin = 0.35            // distance from wall to start applying
+                                      // turn factor
+        this.turnFactor = 0.0012      // force to apply away from wall
     }
 
     //
@@ -30,22 +36,58 @@ export class Boid {
     //
     // update(w, h, boids) {
     update(boundary, boids) {
-        this.avoidOthers(boids)   // Seperation
-        this.matchVelocity(boids) // Alignment
-        this.moveCenter(boids)    // Cohesion
+        this.sim(boids);
 
         this.limitSpeed()
         this.pushOnScreen(boundary)
 
         // Update positions
-        this.mesh.position.addScaledVector(this.vel, 1);
+        this.mesh.position.add(this.vel);
 
         // Update direction
-        const axis = new THREE.Vector3(0, 1, 0);
+        const axis = new THREE.Vector3(0, 1, 0); // Top of mesh goes forward
         this.mesh.quaternion.setFromUnitVectors(axis, this.vel.clone().normalize());
     }
 
     // Velocity Updaters ------------------------
+
+    //
+    // Performs all Velocity updates in one loop;
+    // combination of this.avoidOthers, this.matchVelocity, and this.moveCenter
+    //
+    sim(boids) {
+
+        let neighbors = 0;
+        let match = new THREE.Vector3();
+        let center = new THREE.Vector3();
+        for (let otherBoid of boids) {
+            if (this.distance(otherBoid) >= this.field) continue;
+
+            neighbors++;
+
+            // Avoid Others
+            if (otherBoid !== this && this.distance(otherBoid) < this.minSeperation) {
+                let avoid = this.vel.clone().sub(otherBoid.vel)
+                this.vel.addScaledVector(avoid, this.avoidFactor); // apply avoid force
+            }
+
+            // Match
+            match.add(otherBoid.vel)
+
+            // Center
+            center.add(otherBoid.mesh.position);
+        }
+    
+        // Apply Match Force
+        match.add(this.vel);
+        match.divideScalar(neighbors);
+        this.vel.addScaledVector(match, this.matchFactor);
+
+        // Apply Center Force
+        center.divideScalar(neighbors);
+        center.sub(this.mesh.position);
+        this.vel.addScaledVector(center, this.centeringFactor);
+    }
 
     // 
     // Push for a minimum seperation from other Boids (seperation)
@@ -56,22 +98,14 @@ export class Boid {
         if (boids == null)
             throw 'ERROR: Boid avoidOthers(boids): boids is undefined'
 
-        let moveX = 0;
-        let moveY = 0;
-        let moveZ = 0;
         for (let otherBoid of boids) {
             if (otherBoid !== this) {
                 if (this.distance(otherBoid) < this.minSeperation) {
-                    moveX += this.vel.x - otherBoid.vel.x
-                    moveY += this.vel.y - otherBoid.vel.y
-                    moveZ += this.vel.z - otherBoid.vel.z
+                    let avoid = this.vel.clone().sub(otherBoid.vel)
+                    this.vel.addScaledVector(avoid, this.avoidFactor);
                 }
             }
         }
-
-        this.vel.x += moveX*this.avoidFactor
-        this.vel.y += moveY*this.avoidFactor
-        this.vel.z += moveZ*this.avoidFactor
     }
 
     //
@@ -83,28 +117,19 @@ export class Boid {
         if (boids == null)
             throw 'ERROR: Boid matchVelocity(boids): boids is undefined'
 
-        let avgdx = 0
-        let avgdy = 0
-        let avgdz = 0
         let neighbors = 0
+        let match = new THREE.Vector3();
         for (let otherBoid of boids) {
             if (this.distance(otherBoid) < this.field) {
-                avgdx += otherBoid.vel.x
-                avgdy += otherBoid.vel.y
-                avgdz += otherBoid.vel.z
+                match.add(otherBoid.vel);
                 neighbors++
             }
         }
 
         // Compute averages and update velocity
         if (neighbors) {
-            avgdx /= neighbors;
-            avgdy /= neighbors;
-            avgdz /= neighbors;
-
-            this.vel.x += avgdx*this.matchFactor
-            this.vel.y += avgdy*this.matchFactor
-            this.vel.z += avgdz*this.matchFactor
+            match.divideScalar(neighbors);
+            this.vel.addScaledVector(match, this.matchFactor);
         }
     }
 
@@ -115,30 +140,20 @@ export class Boid {
         if (boids == null)
             throw 'ERROR: Boid matchVelocity(boids): boids is undefined'
 
-        let centerX = 0
-        let centerY = 0
-        let centerZ = 0
         let neighbors = 0;
+        let center = new THREE.Vector3();
 
         for (let otherBoid of boids) {
             if (this.distance(otherBoid) < this.field) {
-                centerX += otherBoid.mesh.position.x
-                centerY += otherBoid.mesh.position.y
-                centerZ += otherBoid.mesh.position.z
+                center.add(otherBoid.mesh.position);
                 neighbors++
             }
         }
 
         if (neighbors) {
-            centerX /= neighbors
-            centerY /= neighbors
-            centerZ /= neighbors
-
-            console.log(centerX, centerY, centerZ);
-
-            this.vel.x += (centerX - this.mesh.position.x) * this.centeringFactor;
-            this.vel.y += (centerY - this.mesh.position.y) * this.centeringFactor;
-            this.vel.z += (centerZ - this.mesh.position.z) * this.centeringFactor;
+            center.divideScalar(neighbors);
+            center.sub(this.mesh.position);
+            this.vel.addScaledVector(center, this.centeringFactor);
         }
     }
 
@@ -154,7 +169,7 @@ export class Boid {
         const boundingBox = new THREE.Box3().setFromObject(boundary);
         const origin = boundingBox.min;
         const size = new THREE.Vector3();
-            boundingBox.getSize(size);
+        boundingBox.getSize(size);
 
         if (this.mesh.position.x > origin.x + size.x) this.mesh.position.x = origin.x;
         else if (this.mesh.position.x < origin.x) this.mesh.position.x = origin.x + size.x;
@@ -176,26 +191,19 @@ export class Boid {
         const boundingBox = new THREE.Box3().setFromObject(boundary);
         const origin = boundingBox.min;
         const size = new THREE.Vector3();
-            boundingBox.getSize(size);
+        boundingBox.getSize(size);
 
-        const margin = 0.3
-        const turnFactor = 0.001
-
-        // <++> NOTE: Should be using ThreeJS Methods to do this more simply
-        // this.vel.addScaledVector( away from cube, turn factor);
         // x component
-        if (this.mesh.position.x < origin.x + margin) this.vel.x += turnFactor;
-        else if (this.mesh.position.x > origin.x + size.x - margin) this.vel.x -= turnFactor;
+        if (this.mesh.position.x < origin.x + this.margin) this.vel.x += this.turnFactor;
+        else if (this.mesh.position.x > origin.x + size.x - this.margin) this.vel.x -= this.turnFactor;
 
         // y component
-        if (this.mesh.position.y < origin.y + margin) this.vel.y += turnFactor;
-        else if (this.mesh.position.y > origin.y + size.y - margin) this.vel.y -= turnFactor;
+        if (this.mesh.position.y < origin.y + this.margin) this.vel.y += this.turnFactor;
+        else if (this.mesh.position.y > origin.y + size.y - this.margin) this.vel.y -= this.turnFactor;
 
         // z component
-        if (this.mesh.position.z < origin.z + margin) this.vel.z += turnFactor;
-        else if (this.mesh.position.z > origin.z + size.z - margin) this.vel.z -= turnFactor;
-
-
+        if (this.mesh.position.z < origin.z + this.margin) this.vel.z += this.turnFactor;
+        else if (this.mesh.position.z > origin.z + size.z - this.margin) this.vel.z -= this.turnFactor;
     }
 
     // Helper Functions --------------------------------
@@ -220,12 +228,11 @@ export class Boid {
         const boundingBox = new THREE.Box3().setFromObject(boundary);
         const origin = boundingBox.min;
         const size = new THREE.Vector3();
-            boundingBox.getSize(size);
+        boundingBox.getSize(size);
 
         const x = origin.x + Math.random()*size.x;
         const y = origin.y + Math.random()*size.y;
         const z = origin.z + Math.random()*size.z;
-        console.log(x, y, z);
         this.mesh.position.set(x, y, z);
     }
 
@@ -273,8 +280,11 @@ export class Boid {
     }
 }
 
+//
+// Controls a group of Boids
+//
 export class BoidController {
-    
+
     constructor(scene, boundary,  maxInst = 10){
         this._scene = scene;
         this._boundary = boundary;
