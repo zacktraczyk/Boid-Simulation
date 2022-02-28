@@ -18,7 +18,7 @@ export class Boid {
 
         this.maxSpeed = 0.02;
         this.field = 0.5;
-        this.minSeperation = 0.1;
+        this.minSeperation = 0.08;
 
         this.centeringFactor = 0.0005 // scalar of force to push to center
         this.avoidFactor = 0.05;      // scalar of force to avoid
@@ -87,74 +87,6 @@ export class Boid {
         center.divideScalar(neighbors);
         center.sub(this.mesh.position);
         this.vel.addScaledVector(center, this.centeringFactor);
-    }
-
-    // 
-    // Push for a minimum seperation from other Boids (seperation)
-    // pre: boids is not null
-    // boids: array of Boid instances
-    //
-    avoidOthers(boids) {
-        if (boids == null)
-            throw 'ERROR: Boid avoidOthers(boids): boids is undefined'
-
-        for (let otherBoid of boids) {
-            if (otherBoid !== this) {
-                if (this.distance(otherBoid) < this.minSeperation) {
-                    let avoid = this.vel.clone().sub(otherBoid.vel)
-                    this.vel.addScaledVector(avoid, this.avoidFactor);
-                }
-            }
-        }
-    }
-
-    //
-    // Move in same direction as other boids (alignment)
-    // Pre: boids is not null
-    // boids: all boid instances
-    //
-    matchVelocity(boids) {
-        if (boids == null)
-            throw 'ERROR: Boid matchVelocity(boids): boids is undefined'
-
-        let neighbors = 0
-        let match = new THREE.Vector3();
-        for (let otherBoid of boids) {
-            if (this.distance(otherBoid) < this.field) {
-                match.add(otherBoid.vel);
-                neighbors++
-            }
-        }
-
-        // Compute averages and update velocity
-        if (neighbors) {
-            match.divideScalar(neighbors);
-            this.vel.addScaledVector(match, this.matchFactor);
-        }
-    }
-
-    //
-    // Move towards center of field (cohesion)
-    //
-    moveCenter(boids) {
-        if (boids == null)
-            throw 'ERROR: Boid matchVelocity(boids): boids is undefined'
-
-        let neighbors = 0;
-        let center = new THREE.Vector3();
-
-        for (let otherBoid of boids) {
-            if (this.distance(otherBoid) < this.field) {
-                center.add(otherBoid.mesh.position);
-                neighbors++
-            }
-        }
-
-        if (neighbors) {
-            center.divideScalar(neighbors);
-            center.sub(this.mesh.position);
-            this.vel.addScaledVector(center, this.centeringFactor);
-        }
     }
 
     // Screen Border Rules ------------------------------

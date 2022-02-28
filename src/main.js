@@ -3,7 +3,7 @@ import { BoidController } from 'boid';
 import { TrackballControls } from 'trackballControls';
 
 // Options
-const maxBoids = 600; // Change Boid Instances
+const maxBoids = 800; // Change Boid Instances
 const debug = false;   // Enable Debug
 
 // Global
@@ -29,7 +29,7 @@ function Init() {
 
     // Camera
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10);
-    camera.position.set(2.5, 2, 2);
+    camera.position.set(0, 0, 3.5);
     camera.lookAt(scene.position);
 
     // light
