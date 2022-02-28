@@ -8,7 +8,7 @@ const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
 
 let Boids, target
-const numBoids = 1000;
+const numBoids = 800;
 
 let I // IO
 
@@ -156,7 +156,7 @@ class BoidController {
             throw 'ERROR: BoidController spawn(w, h): w or h is undefined'
 
         for (let i = 0; i < this.maxInst; i++) { 
-            let b = new Boid(10, 10, 30)
+            let b = new Boid(10, 10, 10)
             b.randomLocation(w, h)
             b.target = target // ugly, watch out for this
             this.boids.push(b)
@@ -201,14 +201,14 @@ class Boid {
     constructor(x, y, w) {
         this.x = x
         this.y = y
-        this.w = w + 20*Math.random() // varry in size
+        this.w = w + 5*Math.random() // varry in size
 
         this.dx = 0 // velocity x component
         this.dy = 1 // velocity y component
 
-        this.maxSpeed = 15
-        this.field = 200
-        this.minSeperation = 40
+        this.maxSpeed = 3 
+        this.field = 50
+        this.minSeperation = 10
 
         this.centeringFactor = 0.005 // scalar of force to push to center
         this.avoidFactor = 0.05      // scalar of force to avoid
@@ -370,8 +370,8 @@ class Boid {
 
         let d = this.distance(this.target)
         if (d < this.target.w*2) {
-            this.dx -= (this.target.x - this.x)
-            this.dy -= (this.target.y - this.y)
+            this.dx -= (this.target.x - this.x)*this.avoidFactor;
+            this.dy -= (this.target.y - this.y)*this.avoidFactor;
         }
     }
 
@@ -403,7 +403,7 @@ class Boid {
         if (w == null || h == null)
             throw 'ERROR: Boid pushOnScreen(w, h): w or h is undefined'
 
-        const margin = 150
+        const margin = 50
         const turnFactor = 2 
 
         if (this.x < margin) this.dx += turnFactor
