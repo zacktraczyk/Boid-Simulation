@@ -67,16 +67,16 @@ export class Boid {
 
             neighbors++;
 
-            // Avoid Others
+            // Avoid Others (separation)
             if (otherBoid !== this && this.distance(otherBoid) < this.minSeperation) {
                 let avoid = this.vel.clone().sub(otherBoid.vel)
                 this.vel.addScaledVector(avoid, this.avoidFactor); // apply avoid force
             }
 
-            // Match
+            // Match (alignment)
             match.add(otherBoid.vel)
 
-            // Center
+            // Center (cohesion)
             center.add(otherBoid.mesh.position);
         }
 

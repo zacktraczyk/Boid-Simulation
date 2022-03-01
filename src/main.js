@@ -68,7 +68,7 @@ function Init() {
     // GUI
     const gui = new GUI()
     const boidVisual = gui.addFolder('Boid Visual');
-    const boidFolder = gui.addFolder('Boid Parameter');
+    const boidFolder = gui.addFolder('Boid Parameters');
 
     boidVisual.add(boids, "debug");
     boidVisual.add(boids, "randomLocation");
@@ -76,11 +76,14 @@ function Init() {
 
     boidFolder.add(boids, "maxSpeed", 0, 0.1);
     boidFolder.add(boids, "field", 0.00001, 3);
-    boidFolder.add(boids, "minSeperation", 0, 1);
-    boidFolder.add(boids, "centeringFactor", 0, 0.01);
-    boidFolder.add(boids, "avoidFactor", 0, 1);
-    boidFolder.add(boids, "matchFactor", 0, 1);
-    boidFolder.open()
+
+    const separationFolder = boidFolder.addFolder('Boid Separation');
+    const alignmentFolder = boidFolder.addFolder('Boid Adhesion');
+    const cohesionFolder = boidFolder.addFolder('Boid Cohesion');
+    separationFolder.add(boids, "minSeperation", 0, 1);
+    separationFolder.add(boids, "avoidFactor", 0, 1);
+    alignmentFolder.add(boids, "matchFactor", 0, 1);
+    cohesionFolder.add(boids, "centeringFactor", 0, 0.01);
 
     // Resize
     window.addEventListener('resize', onWindowResize);
