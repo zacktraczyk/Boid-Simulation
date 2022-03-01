@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { BoidController } from 'boid';
 import { TrackballControls } from 'trackballControls';
+import { GUI } from 'gui';
 
 // Options
 const maxBoids = 800; // Change Boid Instances
-const debug = false;   // Enable Debug
 
 // Global
 let camera, scene, renderer;
@@ -32,7 +32,7 @@ function Init() {
     camera.position.set(0, 0, 3.5);
     camera.lookAt(scene.position);
 
-    // light
+    // Fog
     const color = 0x000000;  // black
     const near = 0;
     const far = 8;
@@ -43,11 +43,10 @@ function Init() {
     const geo = new THREE.EdgesGeometry( box ); // or WireframeGeometry( geometry )
     const mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
     boundary = new THREE.LineSegments( geo, mat );
-    if (debug) scene.add(boundary); // Render
+    scene.add(boundary); // Render
 
     // Initalize Boids
     boids = new BoidController(scene, boundary, maxBoids);
-    boids.debug = debug; // Debug arrow and box
     boids.spawn();
 
     // Initalize Renderer
@@ -66,6 +65,23 @@ function Init() {
 
     controls.keys = [ 'KeyA', 'KeyS', 'KeyD' ];
 
+    // GUI
+    const gui = new GUI()
+    const boidVisual = gui.addFolder('Boid Visual');
+    const boidFolder = gui.addFolder('Boid Parameter');
+
+    boidVisual.add(boids, "debug");
+    boidVisual.add(boids, "randomLocation");
+    boidVisual.open()
+
+    boidFolder.add(boids, "maxSpeed", 0, 0.1);
+    boidFolder.add(boids, "field", 0.00001, 3);
+    boidFolder.add(boids, "minSeperation", 0, 1);
+    boidFolder.add(boids, "centeringFactor", 0, 0.01);
+    boidFolder.add(boids, "avoidFactor", 0, 1);
+    boidFolder.add(boids, "matchFactor", 0, 1);
+    boidFolder.open()
+
     // Resize
     window.addEventListener('resize', onWindowResize);
 
@@ -78,6 +94,12 @@ function Init() {
 function animate() {
     boids.update();
     controls.update(); // Camera Trackball
+
+    // Boundary
+    if (boids.debug)
+        boundary.visible = true;
+    else
+        boundary.visible = false;
 
     // Render and Loop
     renderer.render( scene, camera );
