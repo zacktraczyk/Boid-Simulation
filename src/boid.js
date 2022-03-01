@@ -17,7 +17,7 @@ export class Boid {
         this.vel = new THREE.Vector3().randomDirection();
 
         this.maxSpeed = 0.02;
-        this.field = 0.5;
+        this.field = 0.4;
         this.minSeperation = 0.08;
 
         this.centeringFactor = 0.0005 // scalar of force to push to center
@@ -26,7 +26,8 @@ export class Boid {
 
         this.margin = 0.35            // distance from wall to start applying
                                       // turn factor
-        this.turnFactor = 0.0012      // force to apply away from wall
+        // this.turnFactor = 0.0012      // force to apply away from wall
+        // turn factor changed with speed
     }
 
     //
@@ -36,6 +37,8 @@ export class Boid {
     //
     // update(w, h, boids) {
     update(boundary, boids) {
+        if (this.maxSpeed == 0) return;
+
         this.sim(boids);
 
         this.limitSpeed()
@@ -77,7 +80,7 @@ export class Boid {
             // Center
             center.add(otherBoid.mesh.position);
         }
-    
+
         // Apply Match Force
         match.add(this.vel);
         match.divideScalar(neighbors);
@@ -124,18 +127,25 @@ export class Boid {
         const origin = boundingBox.min;
         const size = new THREE.Vector3();
         boundingBox.getSize(size);
+        this.turnFactor = this.maxSpeed/15; // Adjust turnFactor with speed
 
         // x component
-        if (this.mesh.position.x < origin.x + this.margin) this.vel.x += this.turnFactor;
-        else if (this.mesh.position.x > origin.x + size.x - this.margin) this.vel.x -= this.turnFactor;
+        if (this.mesh.position.x < origin.x + this.margin)
+            this.vel.x += this.turnFactor;
+        else if (this.mesh.position.x > origin.x + size.x - this.margin)
+            this.vel.x -= this.turnFactor;
 
         // y component
-        if (this.mesh.position.y < origin.y + this.margin) this.vel.y += this.turnFactor;
-        else if (this.mesh.position.y > origin.y + size.y - this.margin) this.vel.y -= this.turnFactor;
+        if (this.mesh.position.y < origin.y + this.margin)
+            this.vel.y += this.turnFactor;
+        else if (this.mesh.position.y > origin.y + size.y - this.margin)
+            this.vel.y -= this.turnFactor;
 
         // z component
-        if (this.mesh.position.z < origin.z + this.margin) this.vel.z += this.turnFactor;
-        else if (this.mesh.position.z > origin.z + size.z - this.margin) this.vel.z -= this.turnFactor;
+        if (this.mesh.position.z < origin.z + this.margin)
+            this.vel.z += this.turnFactor;
+        else if (this.mesh.position.z > origin.z + size.z - this.margin)
+            this.vel.z -= this.turnFactor;
     }
 
     // Helper Functions --------------------------------
@@ -172,7 +182,8 @@ export class Boid {
     // Bound speed to maxSpeed
     //
     limitSpeed() {
-        this.vel.clampLength(-this.maxSpeed, this.maxSpeed);
+        if (this.maxSpeed != 0)
+            this.vel.clampLength(-this.maxSpeed, this.maxSpeed);
     }
 
     // Debug Functions --------------------------------
@@ -226,6 +237,15 @@ export class BoidController {
 
         this.debug = false;
         this._debugBoid = null;
+
+        // Boid Properties (for gui)
+        this.maxSpeed = 0.02;
+        this.field = 0.4;
+        this.minSeperation = 0.08;
+
+        this.centeringFactor = 0.0005 // scalar of force to push to center
+        this.avoidFactor = 0.05;      // scalar of force to avoid
+        this.matchFactor = 0.05;      // scalar of force to match directions
     }
 
     //
@@ -240,16 +260,22 @@ export class BoidController {
 
         for (let i = 0; i < this.maxInst; i++) { 
             let b = new Boid(0, 0, 0, 1);
-            this._scene.add(b.mesh);
-            b.randomLocation(this._boundary);
             this.boids.push(b)
-
-            if (this.debug && this._debugBoid == null) {
-                this._debugBoid = b;
-                b.dirDebug();
-                this._scene.add(b.dirArrow);
-            }
+            this._scene.add(b.mesh);
         }
+
+        this.randomLocation();
+
+        // DEBUG
+        this._debugBoid = this.boids[0];
+        this._debugBoid.dirDebug();
+        this._scene.add(this._debugBoid.dirArrow);
+    }
+
+    randomLocation() {
+        this.boids.forEach((b) => {
+            b.randomLocation(this._boundary);
+        });
     }
 
     //
@@ -262,11 +288,29 @@ export class BoidController {
 
         this.boids.forEach(b => {
             b.update(this._boundary, this.boids);
+            this.updateProperties(b);
         });
 
         if (this.debug) {
             this._debugBoid.debug();
+
+            // Arrow
+            this._debugBoid.dirArrow.visible = true;
             this._debugBoid.dirDebug(this._boundary);
+        } else {
+            document.getElementById("debug").innerHTML = "";
+            this._debugBoid.mesh.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            this._debugBoid.dirArrow.visible = false;
         }
+    }
+
+    updateProperties(boid) {
+        boid.maxSpeed = this.maxSpeed;
+        boid.field = this.field;
+        boid.minSeperation = this.minSeperation;
+
+        boid.centeringFactor = this.centeringFactor;
+        boid.avoidFactor = this.avoidFactor;
+        boid.matchFactor = this.matchFactor;
     }
 }
