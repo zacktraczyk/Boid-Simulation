@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 const geometry = new THREE.BoxGeometry(0.05, 0.2, 0.05);    // Boid Geometry
-const material = new THREE.MeshBasicMaterial();             // Boid Material
 // const material = new THREE.MeshStandardMaterial();             // Boid Material
 
 //
@@ -8,9 +7,9 @@ const material = new THREE.MeshBasicMaterial();             // Boid Material
 //
 export class Boid {
 
-    constructor(x, y, z) {
+    constructor(x, y, z, material) {
         // Create Mesh
-        this.mesh = new THREE.Mesh( geometry, material);
+        this.mesh = new THREE.Mesh( geometry, material );
         this.mesh.position.set(x, y, z);
 
         // Randomize velocity
@@ -253,12 +252,14 @@ export class Boid {
 //
 export class BoidController {
 
-    constructor(scene, boundary,  maxInst = 10){
+    constructor(scene, boundary, color, maxInst = 10){
         this._scene = scene;
         this._boundary = boundary;
 
-        this.boids = new Array()
-        this.maxInst = maxInst
+        this.boids = new Array();
+        this.maxInst = maxInst;
+        this.color = color;
+        this.material = new THREE.MeshBasicMaterial({ color: color });
 
         this.debug = false;
         this._debugBoid = null;
@@ -285,7 +286,7 @@ export class BoidController {
             throw 'ERROR: BoidController spawn(w, h): this._boundary is undefined'
 
         for (let i = 0; i < this.maxInst; i++) { 
-            let b = new Boid(0, 0, 0, 1);
+            let b = new Boid(0, 0, 0, this.material);
             this.boids.push(b)
             this._scene.add(b.mesh);
         }
@@ -293,11 +294,11 @@ export class BoidController {
         this.randomLocation();
 
         // DEBUG
-        this._debugBoid = this.boids[0];
-        this._debugBoid.dirDebug();
-        this._debugBoid.fieldDebug();
-        this._scene.add(this._debugBoid.dirArrow);
-        this._scene.add(this._debugBoid.fieldSphere);
+        // this._debugBoid = this.boids[0];
+        // this._debugBoid.dirDebug();
+        // this._debugBoid.fieldDebug();
+        // this._scene.add(this._debugBoid.dirArrow);
+        // this._scene.add(this._debugBoid.fieldSphere);
     }
 
     randomLocation() {
@@ -319,22 +320,25 @@ export class BoidController {
             this.updateProperties(b);
         });
 
-        if (this.debug) {
-            this._debugBoid.debug();
+        // Update Color
+        this.material.color.setHex(this.color);
 
-            // Sphere
-            this._debugBoid.fieldDebug();
-            this._debugBoid.fieldSphere.visible = true;
+        // if (this.debug) {
+        //     this._debugBoid.debug();
 
-            // Arrow
-            this._debugBoid.dirArrow.visible = true;
-            this._debugBoid.dirDebug(this._boundary);
-        } else {
-            document.getElementById("debug").innerHTML = "";
-            this._debugBoid.fieldSphere.visible = false;
-            this._debugBoid.mesh.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-            this._debugBoid.dirArrow.visible = false;
-        }
+        //     // Sphere
+        //     this._debugBoid.fieldDebug();
+        //     this._debugBoid.fieldSphere.visible = true;
+
+        //     // Arrow
+        //     this._debugBoid.dirArrow.visible = true;
+        //     this._debugBoid.dirDebug(this._boundary);
+        // } else {
+        //     document.getElementById("debug").innerHTML = "";
+        //     this._debugBoid.fieldSphere.visible = false;
+        //     this._debugBoid.mesh.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        //     this._debugBoid.dirArrow.visible = false;
+        // }
     }
 
     updateProperties(boid) {

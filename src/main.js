@@ -11,7 +11,7 @@ const maxBoids = 500; // Change Boid Instances
 let camera, scene, renderer;
 let controls; // TrackballControls
 let boundary;
-let boids;
+let boids1, boids2;
 
 //
 // Initialize:
@@ -61,8 +61,10 @@ function Init() {
     plane.position.y = -2;
 
     // Initalize Boids
-    boids = new BoidController(scene, boundary, maxBoids);
-    boids.spawn();
+    boids1 = new BoidController(scene, boundary, 0xeba0ce, maxBoids/2);
+    boids2 = new BoidController(scene, boundary, 0xa0ebbb, maxBoids/2);
+    boids1.spawn();
+    boids2.spawn();
 
     // Initalize Renderer
     renderer = new THREE.WebGLRenderer({antialias: true});
@@ -86,30 +88,37 @@ function Init() {
     controls.keys = [ 'KeyA', 'KeyS', 'KeyD' ];
 
     // GUI
-    const gui = new GUI()
-    const boidVisual = gui.addFolder('Boid Visual');
-    const boidFolder = gui.addFolder('Boid Parameters');
-
-    boidVisual.add(boids, "debug");
-    boidVisual.add(boids, "randomLocation");
-    boidVisual.open()
-
-    boidFolder.add(boids, "maxSpeed", 0, 0.1);
-    boidFolder.add(boids, "maxSpeedY", 0, 0.1);
-    boidFolder.add(boids, "field", 0.00001, 3);
-
-    const separationFolder = boidFolder.addFolder('Boid Separation');
-    const alignmentFolder = boidFolder.addFolder('Boid Adhesion');
-    const cohesionFolder = boidFolder.addFolder('Boid Cohesion');
-    separationFolder.add(boids, "minSeperation", 0, 1);
-    separationFolder.add(boids, "avoidFactor", 0, 1);
-    alignmentFolder.add(boids, "matchFactor", 0, 1);
-    cohesionFolder.add(boids, "centeringFactor", 0, 0.01);
+    initGui();
 
     // Resize
     window.addEventListener('resize', onWindowResize);
 
     animate(); // Call animation loop
+}
+
+//
+// Initalize Gui
+//
+function initGui() {
+    const gui = new GUI()
+    const b = [boids1, boids2];
+    for (let i = 0; i < b.length; i++) {
+        const boidFolder = gui.addFolder(`Boid ${i + 1} Parameters`);
+        boidFolder.add(b[i], "randomLocation");
+
+        boidFolder.addColor(b[i], "color");
+        boidFolder.add(b[i], "maxSpeed", 0, 0.1);
+        boidFolder.add(b[i], "maxSpeedY", 0, 0.1);
+        boidFolder.add(b[i], "field", 0.00001, 3);
+
+        const separationFolder = boidFolder.addFolder('Boid Separation');
+        const alignmentFolder = boidFolder.addFolder('Boid Adhesion');
+        const cohesionFolder = boidFolder.addFolder('Boid Cohesion');
+        separationFolder.add(b[i], "minSeperation", 0, 1);
+        separationFolder.add(b[i], "avoidFactor", 0, 1);
+        alignmentFolder.add(b[i], "matchFactor", 0, 1);
+        cohesionFolder.add(b[i], "centeringFactor", 0, 0.01);
+    }
 }
 
 //
@@ -126,13 +135,14 @@ async function initLogo() {
 // Animation loop, update objects, render, and loop
 //
 function animate() {
-    boids.update();
+    boids1.update();
+    boids2.update();
     controls.update(); // Camera Trackball
 
     // Boundary
-    if (boids.debug)
-        boundary.visible = true;
-    else
+    // if (boids.debug)
+    //     boundary.visible = true;
+    // else
         boundary.visible = false;
 
     // Render and Loop
