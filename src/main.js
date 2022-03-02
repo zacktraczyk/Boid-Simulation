@@ -29,7 +29,7 @@ function Init() {
     scene = new THREE.Scene();
 
     // Camera
-    camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10);
+    camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 100);
     camera.position.set(0, 0, 3.5);
     camera.lookAt(scene.position);
 
@@ -53,7 +53,7 @@ function Init() {
     scene.add(boundary); // Render
 
     // Floor
-    const geoPlane= new THREE.PlaneBufferGeometry(2000, 2000, 8, 8);
+    const geoPlane= new THREE.PlaneBufferGeometry(200, 200, 1, 1);
     const matPlane = new THREE.MeshBasicMaterial({ color: 0xebe4a0, side: THREE.DoubleSide });
     const plane = new THREE.Mesh(geoPlane, matPlane);
     scene.add(plane);
