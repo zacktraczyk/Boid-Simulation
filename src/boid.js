@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 const geometry = new THREE.BoxGeometry(0.05, 0.2, 0.05);    // Boid Geometry
 const material = new THREE.MeshBasicMaterial();             // Boid Material
+// const material = new THREE.MeshStandardMaterial();             // Boid Material
 
 //
 // A single Boid
@@ -16,8 +17,10 @@ export class Boid {
         this.vel = new THREE.Vector3().randomDirection();
 
         this.maxSpeed = 0.02;
+        this.maxSpeedY = 0.005;
+
         this.field = 0.4;
-        this.minSeperation = 0.08;
+        this.minSeperation = 0.13;
 
         this.centeringFactor = 0.0005 // scalar of force to push to center
         this.avoidFactor = 0.05;      // scalar of force to avoid
@@ -40,8 +43,9 @@ export class Boid {
 
         this.sim(boids);
 
-        this.limitSpeed()
-        this.pushOnScreen(boundary)
+        this.limitSpeed();
+        this.limitVelY();
+        this.pushOnScreen(boundary);
 
         // Update positions
         this.mesh.position.add(this.vel);
@@ -186,6 +190,16 @@ export class Boid {
             this.vel.clampLength(-this.maxSpeed, this.maxSpeed);
     }
 
+    // 
+    // Bound y velocity to maxZ
+    //
+    limitVelY() {
+        if (this.vel.y > 0)
+            this.vel.y = this.vel.y > this.maxSpeedY ? this.maxSpeedY : this.vel.y;
+        else 
+            this.vel.y = this.vel.y < -this.maxSpeedY ? -this.maxSpeedY : this.vel.y;
+    }
+
     // Debug Functions --------------------------------
 
     // 
@@ -251,8 +265,9 @@ export class BoidController {
 
         // Boid Properties (for gui)
         this.maxSpeed = 0.02;
+        this.maxSpeedY = 0.005;
         this.field = 0.4;
-        this.minSeperation = 0.08;
+        this.minSeperation = 0.13;
 
         this.centeringFactor = 0.0005 // scalar of force to push to center
         this.avoidFactor = 0.05;      // scalar of force to avoid
@@ -324,6 +339,8 @@ export class BoidController {
 
     updateProperties(boid) {
         boid.maxSpeed = this.maxSpeed;
+        boid.maxSpeedY = this.maxSpeedY;
+
         boid.field = this.field;
         boid.minSeperation = this.minSeperation;
 

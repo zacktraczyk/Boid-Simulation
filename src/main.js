@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { BoidController } from 'boid';
 import { TrackballControls } from 'trackballControls';
+import { loadLogo } from 'loadLogo';
 import { GUI } from 'gui';
 
 // Options
-const maxBoids = 800; // Change Boid Instances
+const maxBoids = 500; // Change Boid Instances
 
 // Global
 let camera, scene, renderer;
@@ -32,18 +33,32 @@ function Init() {
     camera.position.set(0, 0, 3.5);
     camera.lookAt(scene.position);
 
+    // Light
+    const light = new THREE.DirectionalLight('white', 8)
+    light.position.set(3, 3, 3)
+    scene.add(light)
+
     // Fog
-    const color = 0x000000;  // black
     const near = 0;
-    const far = 8;
+    const far = 15;
+    const color = 0x87ace8;  // black
+    scene.background = new THREE.Color(color)
     scene.fog = new THREE.Fog(color, near, far);
 
     // Boundary
-    const box = new THREE.BoxGeometry(3, 3, 3); 
+    const box = new THREE.BoxGeometry(8, 4, 5); 
     const geo = new THREE.EdgesGeometry( box ); // or WireframeGeometry( geometry )
     const mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
     boundary = new THREE.LineSegments( geo, mat );
     scene.add(boundary); // Render
+
+    // Floor
+    const geoPlane= new THREE.PlaneBufferGeometry(2000, 2000, 8, 8);
+    const matPlane = new THREE.MeshBasicMaterial({ color: 0xebe4a0, side: THREE.DoubleSide });
+    const plane = new THREE.Mesh(geoPlane, matPlane);
+    scene.add(plane);
+    plane.rotateX(- Math.PI/2);
+    plane.position.y = -2;
 
     // Initalize Boids
     boids = new BoidController(scene, boundary, maxBoids);
@@ -51,9 +66,14 @@ function Init() {
 
     // Initalize Renderer
     renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
+
+    // Load Models
+    // initLogo();
 
     // Trackball Camera Controls
     controls = new TrackballControls( camera, renderer.domElement);
@@ -75,6 +95,7 @@ function Init() {
     boidVisual.open()
 
     boidFolder.add(boids, "maxSpeed", 0, 0.1);
+    boidFolder.add(boids, "maxSpeedY", 0, 0.1);
     boidFolder.add(boids, "field", 0.00001, 3);
 
     const separationFolder = boidFolder.addFolder('Boid Separation');
@@ -89,6 +110,16 @@ function Init() {
     window.addEventListener('resize', onWindowResize);
 
     animate(); // Call animation loop
+}
+
+//
+// Add Logo to scene
+//
+async function initLogo() {
+    const { logo } = await loadLogo();
+    logo.scale.set(0.01, 0.01, 0.01);
+    logo.rotateX( Math.PI/2);
+    scene.add(logo);
 }
 
 //
