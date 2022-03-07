@@ -1,6 +1,4 @@
 import * as THREE from 'three';
-// const geometry = new THREE.BoxGeometry(0.05, 0.2, 0.05);    // Boid Geometry
-// const material = new THREE.MeshStandardMaterial();             // Boid Material
 
 //
 // A single Boid
@@ -13,7 +11,7 @@ export class Boid {
         this.mesh.position.set(x, y, z);
 
         // Randomize velocity
-        this.axis = new THREE.Vector3(0, 0, 1); // direction to face
+        this.axis = new THREE.Vector3(0, 1, 0); // direction to face
         this.vel = new THREE.Vector3().randomDirection();
 
         this.maxSpeed = 0.02;

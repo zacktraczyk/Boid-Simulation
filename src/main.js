@@ -9,7 +9,7 @@ let fishMesh;       // Loaded Fish Mesh
 let boids1, boids2; // Swarms
 
 // Options
-const maxBoids = 800; // Change Boid Instances
+const maxBoids = 500; // Change Boid Instances
 const debug = { boundingBox: false };
 
 //
@@ -38,14 +38,18 @@ async function Init() {
     ocean.scene.add(initFloor());
 
     // Load Fish Mesh
-    fishMesh = await initFishMesh();
+    const geometry = new THREE.BoxGeometry(0.05, 0.2, 0.05);    // Boid Geometry
+    const material = new THREE.MeshStandardMaterial();             // Boid Material
+    fishMesh = new THREE.Mesh( geometry, material);
+
+    // fishMesh = await initFishMesh();
 
     // Initalize Boids
     boids1 = new BoidController(ocean.scene, ocean.boundary, fishMesh.clone(), 0xeba0ce, maxBoids/2);
     boids1.name = "Fishes 1";
     boids1.spawn();
 
-    fishMesh.scale.set(0.002, 0.002, 0.002);
+    // fishMesh.scale.set(0.002, 0.002, 0.002);
     boids2 = new BoidController(ocean.scene, ocean.boundary, fishMesh.clone(), 0xa0ebbb, maxBoids/2);
     boids2.name = "Fishes 2";
     boids2.spawn();
