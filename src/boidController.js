@@ -6,7 +6,7 @@ import { Boid} from 'boid';
 //
 export class BoidController {
 
-    constructor(scene, boundary, color, maxInst = 10){
+    constructor(scene, boundary, mesh, color, maxInst = 10){
         this._scene = scene;
         this._boundary = boundary;
 
@@ -15,6 +15,8 @@ export class BoidController {
         this.maxInst = maxInst;
         this.color = color;
         this.material = new THREE.MeshBasicMaterial({ color: color });
+        mesh.material = this.material;
+        this.mesh = mesh;
 
         this.debug = false;
         this._debugBoid = null;
@@ -41,7 +43,7 @@ export class BoidController {
             throw 'ERROR: BoidController spawn(w, h): this._boundary is undefined'
 
         for (let i = 0; i < this.maxInst; i++) { 
-            let b = new Boid(0, 0, 0, this.material);
+            let b = new Boid(0, 0, 0, this.mesh.clone(), this.material);
             this.boids.push(b)
             this._scene.add(b.mesh);
         }

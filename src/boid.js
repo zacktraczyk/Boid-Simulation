@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-const geometry = new THREE.BoxGeometry(0.05, 0.2, 0.05);    // Boid Geometry
+// const geometry = new THREE.BoxGeometry(0.05, 0.2, 0.05);    // Boid Geometry
 // const material = new THREE.MeshStandardMaterial();             // Boid Material
 
 //
@@ -7,9 +7,10 @@ const geometry = new THREE.BoxGeometry(0.05, 0.2, 0.05);    // Boid Geometry
 //
 export class Boid {
 
-    constructor(x, y, z, material) {
+    constructor(x, y, z, mesh, material) {
         // Create Mesh
-        this.mesh = new THREE.Mesh( geometry, material );
+        // this.mesh = new THREE.Mesh( geometry, material );
+        this.mesh = mesh;
         this.mesh.position.set(x, y, z);
 
         // Randomize velocity

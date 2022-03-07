@@ -6,9 +6,10 @@ import { GUI } from 'gui';
 
 let ocean;
 let boids1, boids2;
+let logo;
 
 // Options
-const maxBoids = 500; // Change Boid Instances
+const maxBoids = 800; // Change Boid Instances
 
 let debug = { boundingBox: false };
 
@@ -23,12 +24,13 @@ let debug = { boundingBox: false };
 //    Renderer
 //    Camera Controls
 //  Ocean Floor
+//  Load Model
 //  Boid Controllers (2)
 //    Boids
 //      Boid Debug
 //  GUI
 //
-function Init() {
+async function Init() {
 
     // Create World
     ocean = new World(8, 4, 5);
@@ -36,31 +38,31 @@ function Init() {
     // Floor
     ocean.scene.add(initFloor());
 
+    // Load Models
+    logo = await initLogo();
+
+    // Load Materials
+
     // Initalize Boids
-    boids1 = new BoidController(ocean.scene, ocean.boundary, 0xeba0ce, maxBoids/2);
+    boids1 = new BoidController(ocean.scene, ocean.boundary, logo.clone(), 0xeba0ce, maxBoids/2);
     boids1.spawn();
     boids1.name = "Fishes 1";
 
-    boids2 = new BoidController(ocean.scene, ocean.boundary, 0xa0ebbb, maxBoids/2);
+    boids2 = new BoidController(ocean.scene, ocean.boundary, logo.clone(), 0xa0ebbb, maxBoids/2);
     boids2.spawn();
     boids2.name = "Fishes 2";
-
-    // Load Models
-    // initLogo();
 
     // GUI
     const gui = new GUI()
     gui.add(debug, "boundingBox");
     boids1.makeGui(gui);
     boids2.makeGui(gui);
-
-    animate(); // Call animation loop
 }
 
 //
 // Animation loop, update objects, render, and loop
 //
-function animate() {
+function Animate() {
     boids1.update();
     boids2.update();
 
@@ -70,7 +72,7 @@ function animate() {
 
     // Render and Loop
     ocean.update(); // Render Scene
-    requestAnimationFrame( animate );
+    requestAnimationFrame( Animate );
 }
 
 // Helper Functions ------------------------------------
@@ -95,9 +97,10 @@ async function initLogo() {
     const { logo } = await loadLogo();
     logo.scale.set(0.01, 0.01, 0.01);
     logo.rotateX( Math.PI/2);
-    scene.add(logo);
+    return logo;
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    Init()
+window.addEventListener('DOMContentLoaded', async () => {
+    await Init();
+    Animate();
 })

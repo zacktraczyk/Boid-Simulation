@@ -51,7 +51,7 @@ export class World {
     // Return: light
     //
     initLight() {
-        const light = new THREE.DirectionalLight('white', 8);
+        const light = new THREE.DirectionalLight('white', 3);
         light.position.set(3, 3, 3);
         return light;
     }
