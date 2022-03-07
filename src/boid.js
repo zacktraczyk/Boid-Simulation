@@ -7,13 +7,13 @@ import * as THREE from 'three';
 //
 export class Boid {
 
-    constructor(x, y, z, mesh, material) {
+    constructor(x, y, z, mesh) {
         // Create Mesh
-        // this.mesh = new THREE.Mesh( geometry, material );
         this.mesh = mesh;
         this.mesh.position.set(x, y, z);
 
         // Randomize velocity
+        this.axis = new THREE.Vector3(0, 0, 1); // direction to face
         this.vel = new THREE.Vector3().randomDirection();
 
         this.maxSpeed = 0.02;
@@ -49,8 +49,7 @@ export class Boid {
         this.mesh.position.add(this.vel);
 
         // Update direction
-        const axis = new THREE.Vector3(0, 1, 0); // Top of mesh goes forward
-        this.mesh.quaternion.setFromUnitVectors(axis, this.vel.clone().normalize());
+        this.mesh.quaternion.setFromUnitVectors(this.axis, this.vel.clone().normalize());
     }
 
     // Velocity Updaters ------------------------

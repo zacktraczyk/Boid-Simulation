@@ -10,18 +10,21 @@ export class BoidController {
         this._scene = scene;
         this._boundary = boundary;
 
+        // Flock Data
         this.name = "Boid Flock"
         this.boids = new Array();
         this.maxInst = maxInst;
+
+        // Boid Appeareance
         this.color = color;
         this.material = new THREE.MeshBasicMaterial({ color: color });
         mesh.material = this.material;
         this.mesh = mesh;
 
+        // Flock Properties (for gui)
         this.debug = false;
-        this._debugBoid = null;
+        this._debugBoid = null; // 0th Boid in this.boids
 
-        // Boid Properties (for gui)
         this.maxSpeed = 0.02;
         this.maxSpeedY = 0.005;
         this.field = 0.4;
@@ -43,7 +46,7 @@ export class BoidController {
             throw 'ERROR: BoidController spawn(w, h): this._boundary is undefined'
 
         for (let i = 0; i < this.maxInst; i++) { 
-            let b = new Boid(0, 0, 0, this.mesh.clone(), this.material);
+            let b = new Boid(0, 0, 0, this.mesh.clone());
             this.boids.push(b)
             this._scene.add(b.mesh);
         }

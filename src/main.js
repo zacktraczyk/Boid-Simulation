@@ -1,17 +1,16 @@
 import * as THREE from 'three';
 import { World } from 'world';
+import { loadFishMesh } from 'loadFish';
 import { BoidController } from 'boidController';
-import { loadLogo } from 'loadLogo';
 import { GUI } from 'gui';
 
-let ocean;
-let boids1, boids2;
-let logo;
+let ocean;          // World container
+let fishMesh;       // Loaded Fish Mesh
+let boids1, boids2; // Swarms
 
 // Options
 const maxBoids = 800; // Change Boid Instances
-
-let debug = { boundingBox: false };
+const debug = { boundingBox: false };
 
 //
 // Initialize:
@@ -38,19 +37,18 @@ async function Init() {
     // Floor
     ocean.scene.add(initFloor());
 
-    // Load Models
-    logo = await initLogo();
-
-    // Load Materials
+    // Load Fish Mesh
+    fishMesh = await initFishMesh();
 
     // Initalize Boids
-    boids1 = new BoidController(ocean.scene, ocean.boundary, logo.clone(), 0xeba0ce, maxBoids/2);
-    boids1.spawn();
+    boids1 = new BoidController(ocean.scene, ocean.boundary, fishMesh.clone(), 0xeba0ce, maxBoids/2);
     boids1.name = "Fishes 1";
+    boids1.spawn();
 
-    boids2 = new BoidController(ocean.scene, ocean.boundary, logo.clone(), 0xa0ebbb, maxBoids/2);
-    boids2.spawn();
+    fishMesh.scale.set(0.002, 0.002, 0.002);
+    boids2 = new BoidController(ocean.scene, ocean.boundary, fishMesh.clone(), 0xa0ebbb, maxBoids/2);
     boids2.name = "Fishes 2";
+    boids2.spawn();
 
     // GUI
     const gui = new GUI()
@@ -91,16 +89,16 @@ function initFloor() {
 }
 
 //
-// Add Logo to scene
+// Initialize FishMesh to scene
 //
-async function initLogo() {
-    const { logo } = await loadLogo();
-    logo.scale.set(0.01, 0.01, 0.01);
-    logo.rotateX( Math.PI/2);
-    return logo;
+async function initFishMesh() {
+    const { fishMesh } = await loadFishMesh();
+    fishMesh.scale.set(0.001, 0.001, 0.001);
+    fishMesh.rotateX( Math.PI/2);
+    return fishMesh;
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
     await Init();
     Animate();
-})
+});
