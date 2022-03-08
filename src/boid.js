@@ -11,21 +11,21 @@ export class Boid {
         this.mesh.position.set(x, y, z);
 
         // Randomize velocity
-        this.axis = new THREE.Vector3(0, 1, 0); // direction to face
+        this.axis = new THREE.Vector3(0, 0, 1); // direction to face
         this.vel = new THREE.Vector3().randomDirection();
 
-        this.maxSpeed = 0.02;
-        this.maxSpeedY = 0.005;
+        this.maxSpeed = 0.2;
+        this.maxSpeedY = 0.05;
 
-        this.field = 0.4;
-        this.minSeperation = 0.13;
+        this.field = 4;
+        this.minSeperation = 1.3;
 
-        this.centeringFactor = 0.0005 // scalar of force to push to center
-        this.avoidFactor = 0.05;      // scalar of force to avoid
-        this.matchFactor = 0.05;      // scalar of force to match directions
+        this.centeringFactor = 0.005 // scalar of force to push to center
+        this.avoidFactor = 0.5;      // scalar of force to avoid
+        this.matchFactor = 0.5;      // scalar of force to match directions
 
-        this.margin = 0.35            // distance from wall to start applying
-                                      // turn factor
+        this.margin = 9              // distance from wall to start applying
+                                     // turn factor
     }
 
     //
@@ -57,7 +57,6 @@ export class Boid {
     // combination of this.avoidOthers, this.matchVelocity, and this.moveCenter
     //
     sim(boids) {
-
         let neighbors = 0;
         let match = new THREE.Vector3();
         let center = new THREE.Vector3();
@@ -209,7 +208,7 @@ export class Boid {
         if (typeof this.dirArrow == 'undefined') {
 
             const origin = this.mesh.position;
-            const length = 0.5;
+            const length = 5;
             const hex = 0xff0000;
 
             this.dirArrow = new THREE.ArrowHelper( dir, origin, length, hex );

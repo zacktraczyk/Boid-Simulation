@@ -25,14 +25,14 @@ export class BoidController {
         this.debug = false;
         this._debugBoid = null; // 0th Boid in this.boids
 
-        this.maxSpeed = 0.02;
-        this.maxSpeedY = 0.005;
-        this.field = 0.4;
-        this.minSeperation = 0.13;
+        this.maxSpeed = 0.2;
+        this.maxSpeedY = 0.05;
+        this.field = 4;
+        this.minSeperation = 1.3;
 
-        this.centeringFactor = 0.0005 // scalar of force to push to center
-        this.avoidFactor = 0.05;      // scalar of force to avoid
-        this.matchFactor = 0.05;      // scalar of force to match directions
+        this.centeringFactor = 0.005 // scalar of force to push to center
+        this.avoidFactor = 0.5;      // scalar of force to avoid
+        this.matchFactor = 0.5;      // scalar of force to match directions
     }
 
     //
@@ -129,17 +129,17 @@ export class BoidController {
         boidFolder.add(this, "debug");
 
         boidFolder.addColor(this, "color");
-        boidFolder.add(this, "maxSpeed", 0, 0.1);
-        boidFolder.add(this, "maxSpeedY", 0, 0.1);
-        boidFolder.add(this, "field", 0.00001, 3);
+        boidFolder.add(this, "maxSpeed", 0, 1);
+        boidFolder.add(this, "maxSpeedY", 0, 1);
+        boidFolder.add(this, "field", 0.0001, 10);
 
         const separationFolder = boidFolder.addFolder('Boid Separation');
         const alignmentFolder = boidFolder.addFolder('Boid Adhesion');
         const cohesionFolder = boidFolder.addFolder('Boid Cohesion');
-        separationFolder.add(this, "minSeperation", 0, 1);
-        separationFolder.add(this, "avoidFactor", 0, 1);
-        alignmentFolder.add(this, "matchFactor", 0, 1);
-        cohesionFolder.add(this, "centeringFactor", 0, 0.01);
+        separationFolder.add(this, "minSeperation", 0, 10);
+        separationFolder.add(this, "avoidFactor", 0, 10);
+        alignmentFolder.add(this, "matchFactor", 0, 10);
+        cohesionFolder.add(this, "centeringFactor", 0, 0.1);
     }
 
 }
