@@ -17,13 +17,16 @@ export class Boid {
         this.maxSpeed = 0.2;
         this.maxSpeedY = 0.05;
 
+
         this.field = 4;
-        this.minSeperation = 1.3;
+        this.minSeperation = 4.3;
 
         this.centeringFactor = 0.005 // scalar of force to push to center
         this.avoidFactor = 0.5;      // scalar of force to avoid
         this.matchFactor = 0.5;      // scalar of force to match directions
 
+        // this.boundary.origin         // boundary rectangle origin (Vector3)
+        // this.boundary.size           // boundary rectangel dimensions (Vector3)
         this.margin = 9              // distance from wall to start applying
                                      // turn factor
     }

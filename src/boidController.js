@@ -18,6 +18,7 @@ export class BoidController {
         // Boid Appeareance
         this.color = color;
         this.material = new THREE.MeshBasicMaterial({ color: color });
+        // this.material = new THREE.MeshStandardMaterial({ color: color });
         mesh.material = this.material;
         this.mesh = mesh;
 

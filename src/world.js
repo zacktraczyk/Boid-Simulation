@@ -18,7 +18,7 @@ export class World {
         this.scene.add(this.initLight());
 
         // Fog
-        // this.initFog();
+        this.initFog();
 
         // Background Color
         // this.scene.background = new THREE.Color(0xffffff);
@@ -44,7 +44,7 @@ export class World {
     //
     initCamera() {
         const c = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
-        c.position.set(0, 10, 35);
+        c.position.set(0, 30, 75);
         c.lookAt(this.scene.position);
         return c;
     }
@@ -54,7 +54,7 @@ export class World {
     // Return: light
     //
     initLight() {
-        const light = new THREE.DirectionalLight('white', 30);
+        const light = new THREE.DirectionalLight('white', 2);
         light.position.set(30, 30, 30);
         return light;
     }
@@ -66,7 +66,7 @@ export class World {
         const near = 0;
         const far = 170;
         const color = 0x87ace8;  // black
-        this.scene.background = new THREE.Color(color)
+        this.scene.background = new THREE.Color(0x000000);
         this.scene.fog = new THREE.Fog(color, near, far);
     }
 
