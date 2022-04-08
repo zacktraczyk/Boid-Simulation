@@ -17,7 +17,6 @@ export class Boid {
         this.maxSpeed = 0.2;
         this.maxSpeedY = 0.05;
 
-
         this.field = 4;
         this.minSeperation = 4.3;
 
@@ -36,12 +35,10 @@ export class Boid {
     // boundary: a mesh that contains Boid
     // boids: array of Boid instances
     //
-    // update(w, h, boids) {
     update(boundary, boids) {
         if (this.maxSpeed == 0) return;
 
         this.sim(boids);
-
         this.limitSpeed();
         this.limitVelY();
         this.pushOnScreen(boundary);
@@ -50,7 +47,9 @@ export class Boid {
         this.mesh.position.add(this.vel);
 
         // Update direction
-        this.mesh.quaternion.setFromUnitVectors(this.axis, this.vel.clone().normalize());
+        const dir = this.vel.clone();
+        dir.normalize();
+        this.mesh.quaternion.setFromUnitVectors(this.axis, dir);
     }
 
     // Velocity Updaters ------------------------

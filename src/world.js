@@ -70,7 +70,6 @@ export class World {
         this.scene.fog = new THREE.Fog(color, near, far);
     }
 
-
     //
     // Initialize Boundary
     // Return: boundary Mesh

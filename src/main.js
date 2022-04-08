@@ -1,8 +1,8 @@
 import * as THREE from 'three';
+import { GUI } from 'gui';
 import { World } from 'world';
 import { loadMesh } from 'loadMesh';
 import { BoidController } from 'boidController';
-import { GUI } from 'gui';
 
 let ocean;          // World container
 let fishMesh;       // Loaded Fish Mesh
@@ -153,8 +153,9 @@ function initTank() {
 // Initialize FishMesh to scene
 //
 async function initFishMesh() {
-    const { fishMesh } = await loadMesh('../models/ucsc.glb');
-    fishMesh.scale.set(0.2, 0.2, 0.2);
+    const { fishMesh } = await loadMesh('../models/seahorse.glb');
+    fishMesh.scale.set(0.4, 0.4, 0.4);
+
     return fishMesh;
 }
 
