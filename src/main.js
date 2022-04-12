@@ -1,15 +1,27 @@
 import * as THREE from 'three';
 import { GUI } from 'gui';
 import { World } from 'world';
-import { loadMesh } from 'loadMesh';
+// import { loadMesh } from 'loadMesh';
 import { BoidController } from 'boidController';
 
+// Shader
+import Frag from 'frag';
+import Vert from 'vert';
+
+// Shader Attributes
+let uniforms = {
+    boxColor: {
+        value: new THREE.Vector3(0, 0, 1)
+    }
+}
+
 let ocean;          // World container
-let fishMesh;       // Loaded Fish Mesh
-let boids1, boids2; // Swarms
+let fishMesh;
+// let boids1, boids2; // Swarms
+let boids;
 
 // Options
-const maxBoids = 200; // Change Boid Instances
+const maxBoids = 800; // Change Boid Instances
 const debug = { boundingBox: true };
 
 //
@@ -31,37 +43,26 @@ const debug = { boundingBox: true };
 //
 async function Init() {
     // Create World
-    ocean = new World(80, 40, 50);
-
-    // Floor
-    ocean.scene.add(initFloor());
+    ocean = new World(60, 60, 60);
 
     // Tank
-    initTank();
+    // ocean.scene.add(initFloor());
+    // initTank();
 
     // Load Fish Mesh
-    fishMesh = await initFishMesh();
+    const geometry = new THREE.BoxGeometry(0.7, 3, 0.7);    // Boid Geometry
+    const material = new THREE.MeshStandardMaterial();          // Boid Material
+    fishMesh = new THREE.Mesh( geometry, material );
 
     // Initalize Boids
-    boids1 = new BoidController(ocean.scene, ocean.boundary, fishMesh.clone(), 0xeba0ce, maxBoids/2);
-    boids1.name = "Fishes 1";
-    boids1.field = 6;
-    boids1.minSeperation = 2.4;
-    boids1.avoidFactor = 0.34;
-    boids1.matchFactor = 0.02;
-    boids1.centeringFactor = 0.00002;
-    boids1.spawn();
-
-    fishMesh.scale.set(0.04, 0.04, 0.04);
-    boids2 = new BoidController(ocean.scene, ocean.boundary, fishMesh.clone(), 0xa0ebbb, maxBoids/2);
-    boids2.name = "Fishes 2";
-    boids2.spawn();
+    boids = new BoidController(ocean.scene, ocean.boundary, fishMesh.clone(), 0xeba0ce, maxBoids/2);
+    boids.name = "Fishes 1";
+    boids.spawn();
 
     // GUI
     const gui = new GUI()
     gui.add(debug, "boundingBox");
-    boids1.makeGui(gui);
-    boids2.makeGui(gui);
+    boids.makeGui(gui);
     gui.hide();
 }
 
@@ -70,8 +71,7 @@ async function Init() {
 //
 function Animate() {
     // Update Boids
-    boids1.update();
-    boids2.update();
+    boids.update();
 
     // Boundary
     if (debug.boundingBox) ocean.boundary.visible = true;

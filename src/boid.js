@@ -11,14 +11,14 @@ export class Boid {
         this.mesh.position.set(x, y, z);
 
         // Randomize velocity
-        this.axis = new THREE.Vector3(0, 0, 1); // direction to face
+        this.axis = new THREE.Vector3(0, 1, 0); // direction to face
         this.vel = new THREE.Vector3().randomDirection();
 
         this.maxSpeed = 0.2;
         this.maxSpeedY = 0.05;
 
         this.field = 4;
-        this.minSeperation = 4.3;
+        this.minSeperation = 3.3;
 
         this.centeringFactor = 0.005 // scalar of force to push to center
         this.avoidFactor = 0.5;      // scalar of force to avoid
@@ -26,7 +26,7 @@ export class Boid {
 
         // this.boundary.origin         // boundary rectangle origin (Vector3)
         // this.boundary.size           // boundary rectangel dimensions (Vector3)
-        this.margin = 9              // distance from wall to start applying
+        this.margin = 6              // distance from wall to start applying
                                      // turn factor
     }
 

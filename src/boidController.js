@@ -1,6 +1,20 @@
 import * as THREE from 'three';
 import { Boid} from 'boid';
 
+// Shader
+import Frag from 'frag';
+import Vert from 'vert';
+
+// Shader Attributes
+let uniforms = {
+    boxColor: {
+        value: new THREE.Vector3(0, 0, 1)
+    }
+}
+
+let frame = 0;
+
+
 //
 // Controls a group of Boids
 //
@@ -17,7 +31,13 @@ export class BoidController {
 
         // Boid Appeareance
         this.color = color;
-        this.material = new THREE.MeshBasicMaterial({ color: color });
+        this.material =  new THREE.ShaderMaterial({
+            uniforms: uniforms,
+            fragmentShader: Frag(),
+            vertexShader: Vert(),
+        })
+
+        // this.material = new THREE.MeshBasicMaterial({ color: color });
         // this.material = new THREE.MeshStandardMaterial({ color: color });
         mesh.material = this.material;
         this.mesh = mesh;
@@ -27,9 +47,9 @@ export class BoidController {
         this._debugBoid = null; // 0th Boid in this.boids
 
         this.maxSpeed = 0.2;
-        this.maxSpeedY = 0.05;
+        this.maxSpeedY = 10.05;
         this.field = 4;
-        this.minSeperation = 1.3;
+        this.minSeperation = 2.3;
 
         this.centeringFactor = 0.005 // scalar of force to push to center
         this.avoidFactor = 0.5;      // scalar of force to avoid
@@ -85,7 +105,14 @@ export class BoidController {
         });
 
         // Update Color
-        this.material.color.setHex(this.color);
+        frame++;
+
+        const v = Math.sin(frame/100)*0.5 + 0.5;
+        const c1 = new THREE.Vector3(1, 0, 0);
+        const c2 = new THREE.Vector3(0, 0, 1);
+        const boxColor = c1.lerp(c2, v);
+        uniforms.boxColor.value = boxColor;
+        // this.material.color.setHex(this.color);
 
         if (this.debug) {
             this._debugBoid.debug();

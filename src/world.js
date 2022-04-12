@@ -44,7 +44,7 @@ export class World {
     //
     initCamera() {
         const c = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
-        c.position.set(0, 30, 75);
+        c.position.set(30, 20, 45);
         c.lookAt(this.scene.position);
         return c;
     }
@@ -65,7 +65,7 @@ export class World {
     initFog() {
         const near = 0;
         const far = 170;
-        const color = 0x87ace8;  // black
+        const color = 0x000000;  // black
         this.scene.background = new THREE.Color(0x000000);
         this.scene.fog = new THREE.Fog(color, near, far);
     }
