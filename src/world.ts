@@ -1,13 +1,19 @@
 import * as THREE from 'three';
-import { TrackballControls } from 'trackballControls';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls'
 
 //
 // Fish Tank
 // Contains the scene, camera, lights, and renderer
 //
 export class World {
+    public scene: THREE.Scene;
+    public camera: THREE.PerspectiveCamera;
+    public boundary: THREE.LineSegments;
 
-    constructor(x, y, z) {
+    private renderer: THREE.WebGLRenderer;
+    private cameraControls: TrackballControls;
+
+    constructor(x: number, y: number, z: number) {
         // Initalize Scene
         this.scene = new THREE.Scene();
 
@@ -42,7 +48,7 @@ export class World {
     // Initialize the Scene camera
     // Return: camera
     //
-    initCamera() {
+    private initCamera(): THREE.PerspectiveCamera {
         const c = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
         c.position.set(0, 30, 75);
         c.lookAt(this.scene.position);
@@ -53,7 +59,7 @@ export class World {
     // Initialize Scene Light
     // Return: light
     //
-    initLight() {
+    private initLight() {
         const light = new THREE.DirectionalLight('white', 2);
         light.position.set(30, 30, 30);
         return light;
@@ -62,7 +68,7 @@ export class World {
     //
     // Initialize Scene Fog
     //
-    initFog() {
+    private initFog(): void {
         const near = 0;
         const far = 170;
         const color = 0x87ace8;  // black
@@ -74,7 +80,7 @@ export class World {
     // Initialize Boundary
     // Return: boundary Mesh
     //
-    initBoundary(x, y, z) {
+    private initBoundary(x: number, y: number, z: number) {
         const box = new THREE.BoxGeometry(x, y, z); 
         const geo = new THREE.EdgesGeometry( box ); // or WireframeGeometry( geometry )
         const mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
@@ -85,7 +91,7 @@ export class World {
     // Initialize Renderer
     // Return: renderer
     //
-    initRenderer() {
+    private initRenderer(): THREE.WebGLRenderer{
         const r = new THREE.WebGLRenderer({antialias: true});
         r.shadowMap.enabled = true;
         r.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -97,7 +103,7 @@ export class World {
     //
     // Initialize Camera Controls
     //
-    initCameraControls() {
+    private initCameraControls() {
         const cc = new TrackballControls( this.camera, this.renderer.domElement);
         cc.target.set( 0, 0, 0 );
 
@@ -111,7 +117,7 @@ export class World {
     //
     // Update Camera Controls and Render
     //
-    update() {
+    public update() {
         this.cameraControls.update();
         this.renderer.render( this.scene, this.camera );
     }
@@ -119,7 +125,7 @@ export class World {
     //
     // Update screen and camera to new size
     //
-    onWindowResize() {
+    public onWindowResize() {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.cameraControls.handleResize(); // Camera Trackball

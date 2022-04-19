@@ -1,44 +1,15 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Boids</title>
-		<style>
-			body {
-				margin: 0px;
-				height: 100%;
-				overflow: hidden;
-			}
-
-            #debug {
-                color: white;
-                position: fixed;
-                bottom: 50px;
-                left: 50px;
-                z-index: 100;
-                display:block;
-                width: 30%;
-                padding: 10px;
-            }
-		</style>
-    </head>
-    <!-- DEVELOPED BY ZACK TRACZYK -->
-	<script type="importmap">
-		{
-			"imports": {
-				"three": "./src/three.module.js",
-                "world": "./src/world.js",
-				"boid": "./src/boid.js",
-				"boidController": "./src/boidController.js",
-                "trackballControls": "./src/TrackballControls.js",
-                "GLTFLoader": "./src/GLTFLoader.js",
-				"loadMesh": "./src/loadMesh.js",
-				"gui": "./src/gui.js"
-			}
-		}
-	</script>
-    <body>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Boids</title>
+	</head>
+	<body>
+		<!-- DEVELOPED BY ZACK TRACZYK -->
+		<div id="app"></div>
         <div id="debug"></div>
-        <script type="module" src='./src/main.js'></script>
-    </body>
-
+		<script type="module" src="/src/main.ts"></script>
+	</body>
 </html>
