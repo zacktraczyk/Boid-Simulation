@@ -46,20 +46,18 @@ export class World {
 
     //
     // Initialize the Scene camera
-    // Return: camera
     //
     private initCamera(): THREE.PerspectiveCamera {
         const c = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
-        c.position.set(0, 30, 75);
+        c.position.set(0, 30, 65);
         c.lookAt(this.scene.position);
         return c;
     }
 
     //
     // Initialize Scene Light
-    // Return: light
     //
-    private initLight() {
+    private initLight(): any {
         const light = new THREE.DirectionalLight('white', 2);
         light.position.set(30, 30, 30);
         return light;
@@ -70,17 +68,16 @@ export class World {
     //
     private initFog(): void {
         const near = 0;
-        const far = 170;
-        const color = 0x87ace8;  // black
-        this.scene.background = new THREE.Color(0x000000);
+        const far = 230;
+        const color = 0x87ace8;  // blue
+        this.scene.background = new THREE.Color(color);
         this.scene.fog = new THREE.Fog(color, near, far);
     }
 
     //
     // Initialize Boundary
-    // Return: boundary Mesh
     //
-    private initBoundary(x: number, y: number, z: number) {
+    private initBoundary(x: number, y: number, z: number): THREE.LineSegments {
         const box = new THREE.BoxGeometry(x, y, z); 
         const geo = new THREE.EdgesGeometry( box ); // or WireframeGeometry( geometry )
         const mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
@@ -89,7 +86,6 @@ export class World {
 
     //
     // Initialize Renderer
-    // Return: renderer
     //
     private initRenderer(): THREE.WebGLRenderer{
         const r = new THREE.WebGLRenderer({antialias: true});
@@ -103,7 +99,7 @@ export class World {
     //
     // Initialize Camera Controls
     //
-    private initCameraControls() {
+    private initCameraControls(): TrackballControls {
         const cc = new TrackballControls( this.camera, this.renderer.domElement);
         cc.target.set( 0, 0, 0 );
 
@@ -117,7 +113,7 @@ export class World {
     //
     // Update Camera Controls and Render
     //
-    public update() {
+    public update(): void {
         this.cameraControls.update();
         this.renderer.render( this.scene, this.camera );
     }
@@ -125,7 +121,7 @@ export class World {
     //
     // Update screen and camera to new size
     //
-    public onWindowResize() {
+    public onWindowResize(): void {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.cameraControls.handleResize(); // Camera Trackball

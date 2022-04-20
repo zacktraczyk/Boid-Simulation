@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Vector3 } from 'three';
 import { Boid } from './boid';
 
 //
@@ -19,9 +20,13 @@ export class BoidController {
 
     // Boid Attributes
     public attributes: Attributes;
+
     // Debug
     public debug: boolean;
-    private _debugBoid: any;
+    private debugBoid: any;
+    private debugBoid_dir: THREE.ArrowHelper;
+    private debugBoid_field: THREE.Mesh;
+
 
     constructor(scene: THREE.Scene, boundary: THREE.LineSegments, mesh: THREE.Mesh, color: number, maxInst = 10) {
         this.scene = scene;
@@ -41,50 +46,58 @@ export class BoidController {
 
         // Boid Attributes
         this.attributes = {
-            maxSpeed: 0.2,
-            maxSpeedY: 0.05,
+            maxSpeed: 3,
+            maxSpeedY: 0.9,
 
-            field: 4,
-            minSeperation: 4.3,
+            field: 3.8,
 
-            centeringFactor: 0.005, // scalar of force to push to center
-            avoidFactor: 0.5,       // scalar of force to avoid
-            matchFactor: 0.5,       // scalar of force to match directions
+            minSeperation: 2.5,
+            centeringFactor: 1.9,  // scalar of force to push to center
+            matchFactor: 2.6,      // scalar of force to match directions
 
-            margin: 9,              // distance from wall to start applying
-            turnFactor: 0.1,        // scalar of force to turn away
-        } 
+            margin: 9,           // distance from wall to start applying
+            turnFactor: 0.1,     // scalar of force to turn away
+        }
 
-        // Flock Properties (for gui)
+        this.spawn();
+
+        // Debug
+
         this.debug = false;
-        this._debugBoid = null; // 0th Boid in this.boids
+
+        // Debug Arrow and Field
+        const origin = this.mesh.position;
+        const length = 8;
+        const hex = 0xff0000;
+        this.debugBoid_dir = new THREE.ArrowHelper(new Vector3(), origin, length, hex);
+
+        const sphereGeometry = new THREE.SphereGeometry(this.attributes.field, 32, 16);
+        const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 });
+        this.debugBoid_field = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+        // Place debug meshes
+        if (this.boids.length > 0) {
+            this.debugBoid = this.boids[0]; // 0th Boid in this.boids
+
+            this.debugBoid_dirDebug();
+            this.debugBoid_fieldDebug();
+            this.scene.add(this.debugBoid_dir);
+            this.scene.add(this.debugBoid_field);
+        }
     }
 
 
     //
     // Spawns all Boid Instances at random locations
-    // Pre: this.scene and this.boundary is defined
     //
     public spawn(): void {
-        if (this.scene === undefined)
-            throw 'ERROR: BoidController spawn(w, h): this.scene is undefined'
-        if (this.boundary === undefined)
-            throw 'ERROR: BoidController spawn(w, h): this.boundary is undefined'
-
-        for (let i = 0; i < this.maxInst; i++) { 
+        for (let i = 0; i < this.maxInst; i++) {
             let b = new Boid(0, 0, 0, this.mesh.clone());
             this.boids.push(b)
             this.scene.add(b.mesh);
         }
 
         this.randomLocation();
-
-        // DEBUG
-        this._debugBoid = this.boids[0];
-        this._debugBoid.dirDebug();
-        this._debugBoid.fieldDebug();
-        this.scene.add(this._debugBoid.dirArrow);
-        this.scene.add(this._debugBoid.fieldSphere);
     }
 
     //
@@ -98,12 +111,8 @@ export class BoidController {
 
     //
     // Calls Move for each Boid Instance
-    // Pre: this.boundary is defined
     //
     public update(): void {
-        if (this.boundary === undefined)
-            throw 'ERROR: BoidController spawn(w, h): this.boundary is undefined'
-
         this.boids.forEach(b => {
             b.update(this.boundary, this.boids);
             this.updateProperties(b);
@@ -113,27 +122,27 @@ export class BoidController {
         this.material.color.setHex(this.color);
 
         if (this.debug) {
-            this._debugBoid.debug();
-
-            // Sphere
-            this._debugBoid.fieldDebug();
-            this._debugBoid.fieldSphere.visible = true;
+            this.debugBoid.debug();
 
             // Arrow
-            this._debugBoid.dirArrow.visible = true;
-            this._debugBoid.dirDebug(this.boundary);
+            this.debugBoid_dir.visible = true;
+            this.debugBoid_dirDebug();
+
+            // Sphere
+            this.debugBoid_fieldDebug();
+            this.debugBoid_field.visible = true;
+
         } else {
             let debugID = document.getElementById("debug");
             if (debugID)
-                debugID.innerHTML= "";
-            this._debugBoid.fieldSphere.visible = false;
-            this._debugBoid.dirArrow.visible = false;
+                debugID.innerHTML = "";
+            this.debugBoid_field.visible = false;
+            this.debugBoid_dir.visible = false;
         }
     }
 
     //
     // Update properties of a Boid
-    // boid: the Boid to update
     //
     private updateProperties(boid: Boid): void {
         boid.attributes = this.attributes;
@@ -141,7 +150,6 @@ export class BoidController {
 
     //
     // Makes a GUI to adjust Boid parameters
-    // gui: a Dat.Gui GUI
     //
     public makeGui(gui: dat.GUI): void {
         const boidFolder = gui.addFolder(`${this.name}`);
@@ -149,16 +157,31 @@ export class BoidController {
         boidFolder.add(this, "debug");
 
         boidFolder.addColor(this, "color");
-        boidFolder.add(this.attributes, "maxSpeed", 0, 1);
+        boidFolder.add(this.attributes, "maxSpeed", 0, 10);
         boidFolder.add(this.attributes, "maxSpeedY", 0, 1);
         boidFolder.add(this.attributes, "field", 0.0001, 10);
 
-        const separationFolder = boidFolder.addFolder('Boid Separation');
-        const alignmentFolder = boidFolder.addFolder('Boid Adhesion');
-        const cohesionFolder = boidFolder.addFolder('Boid Cohesion');
-        separationFolder.add(this.attributes, "minSeperation", 0, 10);
-        separationFolder.add(this.attributes, "avoidFactor", 0, 10);
-        alignmentFolder.add(this.attributes, "matchFactor", 0, 10);
-        cohesionFolder.add(this.attributes, "centeringFactor", 0, 0.1);
+        boidFolder.add(this.attributes, "minSeperation", 0, 10);
+        boidFolder.add(this.attributes, "matchFactor", 0, 10);
+        boidFolder.add(this.attributes, "centeringFactor", 0, 10);
     }
+
+    // 
+    // Draw Direction vector
+    //
+    public debugBoid_dirDebug(): void {
+        const dir = this.debugBoid.vel.clone().normalize();
+        this.debugBoid_dir.position.copy(this.debugBoid.mesh.position);
+        this.debugBoid_dir.setDirection(dir);
+    }
+
+    // 
+    // Draw Field Sphere
+    //
+    public debugBoid_fieldDebug(): void {
+        this.debugBoid_field.position.copy(this.debugBoid.mesh.position);
+        this.debugBoid_field.scale.set(this.debugBoid.attributes.field,
+            this.debugBoid.attributes.field, this.attributes.field);
+    }
+
 }

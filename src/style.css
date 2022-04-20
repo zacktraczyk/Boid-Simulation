@@ -11,7 +11,7 @@ body {
 }
 
 #debug {
-	color: white;
+	color: black;
 	position: fixed;
 	bottom: 50px;
 	left: 50px;

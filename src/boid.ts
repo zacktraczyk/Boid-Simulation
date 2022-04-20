@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { _SRGBAFormat } from 'three';
 //
 // A single Boid
 //
@@ -13,10 +14,6 @@ export class Boid {
     // Boid Attributes
     public attributes: Attributes;
 
-    // Debug
-    private dirArrow: THREE.ArrowHelper;
-    private fieldSphere: THREE.Mesh;
-
     constructor(x: number, y: number, z: number, mesh: THREE.Mesh) {
         // Create Mesh
         this.mesh = mesh;
@@ -28,30 +25,18 @@ export class Boid {
 
         // Boid Attribute Defaults
         this.attributes = {
-            maxSpeed: 0.2,
-            maxSpeedY: 0.05,
+            maxSpeed: 0,
+            maxSpeedY: 0,
 
-            field: 4,
-            minSeperation: 4.3,
+            field: 0,
+            minSeperation: 0,
 
-            centeringFactor: 0.005, // scalar of force to push to center
-            avoidFactor: 0.5,       // scalar of force to avoid
-            matchFactor: 0.5,       // scalar of force to match directions
+            centeringFactor: 0,    // scalar of force to push to center
+            matchFactor: 0,        // scalar of force to match directions
 
-            margin: 9,              // distance from wall to start applying
-            turnFactor: 0.1,        // scalar of force to turn away
+            margin: 9,             // distance from wall to start applying
+            turnFactor: 0.1,       // scalar of force to turn away
         }
-
-        // Debug
-        const origin = this.mesh.position;
-        const length = 5;
-        const hex = 0xff0000;
-        this.dirArrow = new THREE.ArrowHelper(this.vel, origin, length, hex);
-
-        const sphereGeometry = new THREE.SphereGeometry(this.attributes.field, 32, 16); 
-        const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.3 });
-        this.fieldSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-
     }
 
     //
@@ -72,7 +57,7 @@ export class Boid {
 
         // Update direction
         const dir = this.vel.clone();
-        dir.setY(0); // lock on y plane
+        // dir.setY(0); // lock on y plane
         dir.normalize();
         this.mesh.quaternion.setFromUnitVectors(this.axis, dir);
     }
@@ -87,6 +72,7 @@ export class Boid {
         let neighbors = 0;
         let match = new THREE.Vector3();
         let center = new THREE.Vector3();
+        // this.pushDebug = this.vel.clone();
         for (let otherBoid of boids) {
             if (this.distance(otherBoid) >= this.attributes.field) continue;
 
@@ -95,7 +81,7 @@ export class Boid {
             // Avoid Others (separation)
             if (otherBoid !== this && this.distance(otherBoid) < this.attributes.minSeperation) {
                 let avoid = this.vel.clone().sub(otherBoid.vel)
-                this.vel.addScaledVector(avoid, this.attributes.avoidFactor); // apply avoid force
+                this.vel.addScaledVector(avoid, 2*this.attributes.maxSpeed/100*this.attributes.minSeperation); // apply avoid force
             }
 
             // Match (alignment)
@@ -108,12 +94,12 @@ export class Boid {
         // Apply Match Force
         match.add(this.vel);
         match.divideScalar(neighbors);
-        this.vel.addScaledVector(match, this.attributes.matchFactor);
+        this.vel.addScaledVector(match, 0.1*this.attributes.matchFactor);
 
         // Apply Center Force
         center.divideScalar(neighbors);
         center.sub(this.mesh.position);
-        this.vel.addScaledVector(center, this.attributes.centeringFactor);
+        this.vel.addScaledVector(center, 0.1*this.attributes.centeringFactor/100);
     }
 
     // Screen Border Rules ------------------------------
@@ -145,7 +131,7 @@ export class Boid {
         const origin = boundingBox.min;
         const size = new THREE.Vector3();
         boundingBox.getSize(size);
-        this.attributes.turnFactor = this.attributes.maxSpeed / 15; // Adjust turnFactor with speed
+        this.attributes.turnFactor = this.attributes.maxSpeed / 150; // Adjust turnFactor with speed
 
         // x component
         if (this.mesh.position.x < origin.x + this.attributes.margin)
@@ -174,9 +160,6 @@ export class Boid {
     // other: instance containing properties x and y
     //
     private distance(other: Boid): number {
-        if (other == null)
-            throw 'ERROR: Boid distance(other): other is undefined'
-
         return this.mesh.position.distanceTo(other.mesh.position);
     }
 
@@ -206,39 +189,20 @@ export class Boid {
     //
     private limitSpeed(): void {
         if (this.attributes.maxSpeed != 0)
-            this.vel.clampLength(-this.attributes.maxSpeed, this.attributes.maxSpeed);
+            this.vel.clampLength(-this.attributes.maxSpeed/10, this.attributes.maxSpeed/10);
     }
 
     // 
     // Bound y velocity to maxZ
     //
     private limitVelY(): void {
-        if (this.vel.y > 0)
-            this.vel.y = this.vel.y > this.attributes.maxSpeedY ? this.attributes.maxSpeedY : this.vel.y;
-        else
-            this.vel.y = this.vel.y < -this.attributes.maxSpeedY ? -this.attributes.maxSpeedY : this.vel.y;
+        this.vel.setY(this.vel.y*this.attributes.maxSpeedY)
     }
 
     // Debug Functions --------------------------------
 
     // 
-    // Draw Direction vector
-    //
-    public dirDebug() {
-        const dir = this.vel.clone().normalize();
-        this.dirArrow.position.copy(this.mesh.position); // = this.mesh.position.x;
-        this.dirArrow.setDirection(dir);
-    }
-
-    public fieldDebug() {
-        this.fieldSphere.position.copy(this.mesh.position);
-        this.fieldSphere.scale.set(this.attributes.field, this.attributes.field, this.attributes.field);
-    }
-
-    // 
-    // Draw properties of Boid to canvas
-    // w: screen width
-    // h: screen height
+    // Draw properties of Boid to DOM
     //
     public debug(): void {
         const debug = document.getElementById("debug");
