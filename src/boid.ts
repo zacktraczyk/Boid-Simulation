@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { _SRGBAFormat } from 'three';
+
 //
 // A single Boid
 //
@@ -24,25 +24,14 @@ export class Boid {
         this.vel = new THREE.Vector3().randomDirection();
 
         // Boid Attribute Defaults
-        this.attributes = {
-            maxSpeed: 0,
-            maxSpeedY: 0,
-
-            field: 0,
-            minSeperation: 0,
-
-            centeringFactor: 0,    // scalar of force to push to center
-            matchFactor: 0,        // scalar of force to match directions
-
-            margin: 9,             // distance from wall to start applying
-            turnFactor: 0.1,       // scalar of force to turn away
+		this.attributes = {
+			maxSpeed: 0, maxSpeedY: 0, field: 0, minSeperation: 0,
+			centeringFactor: 0, matchFactor: 0, margin: 0, turnFactor: 0,
         }
     }
 
     //
     // Draw Boid to canvas
-    // boundary: a mesh that contains Boid
-    // boids: array of Boid instances
     //
     public update(boundary: THREE.LineSegments, boids: Array<Boid>) {
         if (this.attributes.maxSpeed == 0) return;
@@ -156,8 +145,6 @@ export class Boid {
 
     //
     // Calculate Distance from an object
-    // Pre: other is not null
-    // other: instance containing properties x and y
     //
     private distance(other: Boid): number {
         return this.mesh.position.distanceTo(other.mesh.position);
@@ -165,7 +152,6 @@ export class Boid {
 
     //
     // Randomize X and y position inside a given mesh
-    // boundary: a mesh that the Boids will spawn inside
     //
     public randomLocation(boundary: THREE.LineSegments) {
         const boundingBox = new THREE.Box3().setFromObject(boundary);

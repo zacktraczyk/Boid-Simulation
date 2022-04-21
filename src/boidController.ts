@@ -55,8 +55,8 @@ export class BoidController {
             centeringFactor: 1.9,  // scalar of force to push to center
             matchFactor: 2.6,      // scalar of force to match directions
 
-            margin: 9,           // distance from wall to start applying
-            turnFactor: 0.1,     // scalar of force to turn away
+            margin: 9,             // distance from wall to start applying
+            turnFactor: 0.1,       // scalar of force to turn away
         }
 
         this.spawn();
