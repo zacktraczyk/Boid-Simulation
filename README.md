@@ -10,6 +10,13 @@ I hope to use the [Looking Glass Portrait](https://lookingglassfactory.com/), an
 - [Looking Glass Portrait](https://lookingglassfactory.com/product/4k)
 - [Ultraleap](https://www.ultraleap.com/)
 
+## How To Run
+
+This project was built with nodejs, so node and npm are required to run the demo. First install the required node packages by running `node install` in the project directory.
+
+To run the simulation locally in developer mode execute `npm run dev`.
+
+To create a static build `vite.config.js` base directory will need to be changed to the desired base, and then execute `npm run build`.
 ---
 ## Project Log
 

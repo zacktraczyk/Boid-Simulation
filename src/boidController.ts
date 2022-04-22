@@ -1,16 +1,19 @@
 import * as THREE from 'three';
-import { Vector3 } from 'three';
 import { Boid } from './boid';
 
 //
 // Controls a group of Boids
 //
 export class BoidController {
+
     public name: string;
+    public attributes: Attributes;
+    public debug: boolean;
 
     private scene: THREE.Scene;
     private boundary: any;
 
+    // Boid Array
     private boids: Array<Boid>;
     private maxInst: number;
 
@@ -18,11 +21,7 @@ export class BoidController {
     private material: THREE.MeshBasicMaterial;
     private mesh: THREE.Mesh;
 
-    // Boid Attributes
-    public attributes: Attributes;
-
     // Debug
-    public debug: boolean;
     private debugBoid: any;
     private debugBoid_dir: THREE.ArrowHelper;
     private debugBoid_field: THREE.Mesh;
@@ -52,11 +51,10 @@ export class BoidController {
             field: 5.2,
 
             seperation: 3,
-            cohesion: 5.8,  // scalar of force to push to center
-            alignment: 5.8,      // scalar of force to match directions
+            cohesion: 5.8,   // scalar of force to push to center
+            alignment: 5.8,  // scalar of force to match directions
 
-            margin: 9,             // distance from wall to start applying
-            turnFactor: 0.1,       // scalar of force to turn away
+            margin: 9        // distance from wall to start applying
         }
 
         this.spawn();
@@ -69,7 +67,7 @@ export class BoidController {
         const origin = this.mesh.position;
         const length = 8;
         const hex = 0xff0000;
-        this.debugBoid_dir = new THREE.ArrowHelper(new Vector3(), origin, length, hex);
+        this.debugBoid_dir = new THREE.ArrowHelper(new THREE.Vector3(), origin, length, hex);
 
         const sphereGeometry = new THREE.SphereGeometry(this.attributes.field, 32, 16);
         const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 });
@@ -183,5 +181,4 @@ export class BoidController {
         this.debugBoid_field.scale.set(this.debugBoid.attributes.field,
             this.debugBoid.attributes.field, this.attributes.field);
     }
-
 }

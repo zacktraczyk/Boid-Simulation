@@ -6,13 +6,11 @@ import * as THREE from 'three';
 export class Boid {
 
     public mesh: THREE.Mesh;
+    public attributes: Attributes;
 
     // Direction
     private axis: THREE.Vector3;
     private vel: THREE.Vector3;
-
-    // Boid Attributes
-    public attributes: Attributes;
 
     constructor(x: number, y: number, z: number, mesh: THREE.Mesh) {
         // Create Mesh
@@ -26,7 +24,7 @@ export class Boid {
         // Boid Attribute Defaults
 		this.attributes = {
 			maxSpeed: 0, maxSpeedY: 0, field: 0, seperation: 0,
-			cohesion: 0, alignment: 0, margin: 0, turnFactor: 0,
+			cohesion: 0, alignment: 0, margin: 0,
         }
     }
 
@@ -36,6 +34,7 @@ export class Boid {
     public update(boundary: THREE.LineSegments, boids: Array<Boid>) {
         if (this.attributes.maxSpeed == 0) return;
 
+        // Update Velocity
         this.sim(boids);
         this.limitSpeed();
         this.limitVelY();
@@ -54,14 +53,12 @@ export class Boid {
     // Velocity Updaters ------------------------
 
     //
-    // Performs all Velocity updates in one loop;
-    // combination of this.avoidOthers, this.matchVelocity, and this.moveCenter
+    // Performs all Velocity updates in one loop
     //
     private sim(boids: Array<Boid>): void {
         let neighbors = 0;
         let match = new THREE.Vector3();
         let center = new THREE.Vector3();
-        // this.pushDebug = this.vel.clone();
         for (let otherBoid of boids) {
             if (this.distance(otherBoid) >= this.attributes.field) continue;
 
@@ -80,12 +77,12 @@ export class Boid {
             center.add(otherBoid.mesh.position);
         }
 
-        // Apply Match Force
+        // Apply Alignment Force
         match.add(this.vel);
         match.divideScalar(neighbors);
         this.vel.addScaledVector(match, 0.1*this.attributes.alignment);
 
-        // Apply Center Force
+        // Apply Cohesion Force
         center.divideScalar(neighbors);
         center.sub(this.mesh.position);
         this.vel.addScaledVector(center, 0.1*this.attributes.cohesion/100);
@@ -103,35 +100,29 @@ export class Boid {
         const origin = boundingBox.min;
         const size = new THREE.Vector3();
         boundingBox.getSize(size);
-        this.attributes.turnFactor = this.attributes.maxSpeed / 150; // Adjust turnFactor with speed
+
+        const turnFactor = this.attributes.maxSpeed / 150; // Adjust turnFactor with speed
 
         // x component
         if (this.mesh.position.x < origin.x + this.attributes.margin)
-            this.vel.x += this.attributes.turnFactor;
+            this.vel.x += turnFactor;
         else if (this.mesh.position.x > origin.x + size.x - this.attributes.margin)
-            this.vel.x -= this.attributes.turnFactor;
+            this.vel.x -= turnFactor;
 
         // y component
         if (this.mesh.position.y < origin.y + this.attributes.margin)
-            this.vel.y += this.attributes.turnFactor;
+            this.vel.y += turnFactor;
         else if (this.mesh.position.y > origin.y + size.y - this.attributes.margin)
-            this.vel.y -= this.attributes.turnFactor;
+            this.vel.y -= turnFactor;
 
         // z component
         if (this.mesh.position.z < origin.z + this.attributes.margin)
-            this.vel.z += this.attributes.turnFactor;
+            this.vel.z += turnFactor;
         else if (this.mesh.position.z > origin.z + size.z - this.attributes.margin)
-            this.vel.z -= this.attributes.turnFactor;
+            this.vel.z -= turnFactor;
     }
 
     // Helper Functions --------------------------------
-
-    //
-    // Calculate Distance from an object
-    //
-    private distance(other: Boid): number {
-        return this.mesh.position.distanceTo(other.mesh.position);
-    }
 
     //
     // Randomize X, Y, and Z position inside a given boundary
@@ -169,6 +160,13 @@ export class Boid {
 			this.vel.setY(this.vel.y*this.attributes.maxSpeedY)
 		if (this.vel.clone().normalize().y < -this.attributes.maxSpeedY)
 			this.vel.setY(this.vel.y*-this.attributes.maxSpeedY)
+    }
+
+    //
+    // Calculate Distance from an object
+    //
+    private distance(other: Boid): number {
+        return this.mesh.position.distanceTo(other.mesh.position);
     }
 
     // Debug Functions --------------------------------
