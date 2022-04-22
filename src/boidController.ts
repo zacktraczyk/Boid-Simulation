@@ -46,14 +46,14 @@ export class BoidController {
 
         // Boid Attributes
         this.attributes = {
-            maxSpeed: 3,
-            maxSpeedY: 0.9,
+            maxSpeed: 4.7,
+            maxSpeedY: 1,
 
-            field: 3.8,
+            field: 5.2,
 
-            minSeperation: 2.5,
-            centeringFactor: 1.9,  // scalar of force to push to center
-            matchFactor: 2.6,      // scalar of force to match directions
+            minSeperation: 3,
+            centeringFactor: 5.8,  // scalar of force to push to center
+            matchFactor: 5.8,      // scalar of force to match directions
 
             margin: 9,             // distance from wall to start applying
             turnFactor: 0.1,       // scalar of force to turn away

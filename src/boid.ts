@@ -182,7 +182,10 @@ export class Boid {
     // Bound y velocity to maxZ
     //
     private limitVelY(): void {
-        this.vel.setY(this.vel.y*this.attributes.maxSpeedY)
+		if (this.vel.clone().normalize().y > this.attributes.maxSpeedY)
+			this.vel.setY(this.vel.y*this.attributes.maxSpeedY)
+		if (this.vel.clone().normalize().y < -this.attributes.maxSpeedY)
+			this.vel.setY(this.vel.y*-this.attributes.maxSpeedY)
     }
 
     // Debug Functions --------------------------------
