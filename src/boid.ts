@@ -94,27 +94,10 @@ export class Boid {
     // Screen Border Rules ------------------------------
 
     //
-    // Move from one offscreen one side onto the other
-    //
-    // private wrapScreen(boundary: THREE.LineSegments): void {
-    //     const boundingBox = new THREE.Box3().setFromObject(boundary);
-    //     const origin = boundingBox.min;
-    //     const size = new THREE.Vector3();
-    //     boundingBox.getSize(size);
-
-    //     if (this.mesh.position.x > origin.x + size.x) this.mesh.position.x = origin.x;
-    //     else if (this.mesh.position.x < origin.x) this.mesh.position.x = origin.x + size.x;
-
-    //     if (this.mesh.position.y > origin.y + size.y) this.mesh.position.y = origin.y;
-    //     else if (this.mesh.position.y < origin.y) this.mesh.position.y = origin.y + size.y;
-
-    //     if (this.mesh.position.z > origin.z + size.z) this.mesh.position.z = origin.z;
-    //     else if (this.mesh.position.z < origin.z) this.mesh.position.z = origin.z + size.z;
-    // }
-
-    //
     // Push away from screen edge if within margin
     //
+    // <++> TODO: Fix Boids leaving boundary
+    // <++> TODO: make smoother
     private pushOnScreen(boundary: THREE.LineSegments) {
         const boundingBox = new THREE.Box3().setFromObject(boundary);
         const origin = boundingBox.min;
@@ -151,7 +134,7 @@ export class Boid {
     }
 
     //
-    // Randomize X and y position inside a given mesh
+    // Randomize X, Y, and Z position inside a given boundary
     //
     public randomLocation(boundary: THREE.LineSegments) {
         const boundingBox = new THREE.Box3().setFromObject(boundary);

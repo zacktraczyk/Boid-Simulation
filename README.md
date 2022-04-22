@@ -1,8 +1,8 @@
 # 3D visualization - Boids
 
-Using the space's 3D visualization tools I plan to make an interactive visualization. Specifically I plan to replicate flocking behavior using [Boids](https://cs.stanford.edu/people/eroberts/courses/soco/projects/2008-09/modeling-natural-systems/boids.html), an emerging phenomena and example of complexity theory.
+Using the 3D visualization tools in the [UCSC Science & Engineering DSI](https://guides.library.ucsc.edu/DS/DSI/Home) I plan to make an interactive visualization. Specifically I plan to replicate flocking behavior using [Boids](https://cs.stanford.edu/people/eroberts/courses/soco/projects/2008-09/modeling-natural-systems/boids.html), an emerging phenomena and example of complexity theory.
 
-I hope to use the Looking Glass Portrait, and the Looking Glass 4K to display my simulation in holographic 3D space.
+I hope to use the [Looking Glass Portrait](https://lookingglassfactory.com/), and the Looking Glass 4K to display my simulation in holographic 3D space. Additionally, I plan to use [Ultraleap](https://www.ultraleap.com/) to interact with the by tracking a hand in open air.
 
 ***[Here is my non-holographic demo.](https://xxzbuckxx.github.io/Boid-Simulation/)***
 
@@ -214,9 +214,24 @@ For the test fish 3D Model I used blender to convert a STL file into a glTF. I u
 
 ![22-03-07 ThreeJS Boids 2 Flock UCSC Model](https://github.com/xxzbuckxx/Boid-Simulation/blob/main/log-assets/22-03-07%20ThreeJS%20Boids%202%20Flock%20UCSC%20Model.gif?raw=true)
 
-[Something to Aspire to?](https://web.archive.org/web/20210531135555/http://www.fishgl.com/)
+---
+### 22-04-22 Code Refactor
 
-The next step in making my simulation look more like the ocean is actually importing the fish models. However, before I am ready to do that I need to revisit how Boids are stored and rendered. The current structure is operates on a Boid to Boid basis. Every time a new Boid is created, it creates a new mesh and stores it as a property of a Boid object. This naive approach has been fine for simple geometry. However, an imported model will probably have a lot more vertices. This means rendering will take a lot more GPU power which could quickly slow down the simulation and bottleneck the number of possible Boids.
+As the simulation is nearly finished, it was time to figure out the logistics of interfacing Holoplay (the holographic display software) with my simulation. I knew that ThreeJS would work with the software but I had to think about the easiest way to do this. At the same time, I looked over my javascript modules and I didn't like my long import map in my index. Although I loved the simplicity of vanilla Javascript, it was about time to put some more infrastructure behind my code.
+
+I decided to refactor my code and use Typescript with NodeJS. Dealing with all the different types of meshes and geometries and various objects being passed through functions it would definitely help to have a strongly typed language to stop me from making silly mistakes. I decided to use Vite to bundle my Typescript into a static site. I have heard a lot of good things about Vite and I wouldn't a simple web bundler that did not require much configuration. Not that I was using Node I imported ThreeJS and its extensions through npm instead of using downloaded releases.
+
+After all the refactoring, I decided to redo the GUI that controlled the Boid Parameters. I did not like how it was so cluttered, and I wanted the separation, alignment, and cohesion to be clearly distinct with one value each. Here is the old GUI:
+
+![22-04-22 Old UI](https://github.com/xxzbuckxx/Boid-Simulation/blob/main/log-assets/22-04-22%20Old%20UI.png?raw=true)
+
+First I got rid of the avoidFactor attribute and instead made it equal to `2*this.attributes.maxSpeed/100*this.attributes.minSeperation`. This way the avoid factor would scale with the speed and separation distance instead of being a manually controlled parameter. This allowed me to get rid of the subfolders in the GUI making the overall interface a lot cleaner.
+
+Next, I decided to scale my Boid attributes to have more sensible parameters. The decimal representations were not very pretty and it was confusing that the centeringFactor was 100x smaller than everything else. I spent some time making good coefficients to this attributes, so that the scales would all be from 1 to 10, except for the maxSpeedY which was a ratio of the total speed from 0 to 1. With all of this implemented, the updated GUI looked a lot cleaner and was a lot more satisfying to control:
+
+![22-04-22 New UI.png](https://github.com/xxzbuckxx/Boid-Simulation/blob/main/log-assets/22-04-22%20New%20UI.png?raw=true)
+
+Finally, I decided to do some Git cleanup and add this log to the Github. I wanted the repo to contain all the information about the project so I uploaded the images and this README. I merged the 3D branch into the `main`, and created a `gh-pages` branch to designate for the static site to be displayed. Finally, I aded a "See How I work" button to link to the github code.
 
 ---
 ## References
