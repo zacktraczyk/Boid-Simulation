@@ -8,6 +8,5 @@ interface Attributes {
     cohesion: number,
     alignment: number,
 
-    margin: number,
-    turnFactor: number
+    margin: number
 }
