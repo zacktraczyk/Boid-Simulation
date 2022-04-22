@@ -218,6 +218,8 @@ For the test fish 3D Model I used blender to convert a STL file into a glTF. I u
 ---
 ### 22-04-22 Code Refactor
 
+[Here is the code at the end of this stage](https://github.com/xxzbuckxx/Boid-Simulation/tree/3b33bffc9d78d8fdae21051f4ae4319e519eff23)
+
 As the simulation is nearly finished, it was time to figure out the logistics of interfacing Holoplay (the holographic display software) with my simulation. I knew that ThreeJS would work with the software but I had to think about the easiest way to do this. At the same time, I looked over my javascript modules and I didn't like my long import map in my index. Although I loved the simplicity of vanilla Javascript, it was about time to put some more infrastructure behind my code.
 
 I decided to refactor my code and use Typescript with NodeJS. Dealing with all the different types of meshes and geometries and various objects being passed through functions it would definitely help to have a strongly typed language to stop me from making silly mistakes. I decided to use Vite to bundle my Typescript into a static site. I have heard a lot of good things about Vite and I wouldn't a simple web bundler that did not require much configuration. Not that I was using Node I imported ThreeJS and its extensions through npm instead of using downloaded releases.
