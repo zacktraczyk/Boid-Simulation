@@ -216,7 +216,7 @@ For the test fish 3D Model I used blender to convert a STL file into a glTF. I u
 ![22-03-07 ThreeJS Boids 2 Flock UCSC Model](https://github.com/xxzbuckxx/Boid-Simulation/blob/main/log-assets/22-03-07%20ThreeJS%20Boids%202%20Flock%20UCSC%20Model.gif?raw=true)
 
 ---
-### 22-04-22 Code Refactor
+### 22-04-22 Code Refactor and GUI update
 
 [Here is the code at the end of this stage](https://github.com/xxzbuckxx/Boid-Simulation/tree/3b33bffc9d78d8fdae21051f4ae4319e519eff23)
 

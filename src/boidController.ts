@@ -51,9 +51,9 @@ export class BoidController {
 
             field: 5.2,
 
-            minSeperation: 3,
-            centeringFactor: 5.8,  // scalar of force to push to center
-            matchFactor: 5.8,      // scalar of force to match directions
+            seperation: 3,
+            cohesion: 5.8,  // scalar of force to push to center
+            alignment: 5.8,      // scalar of force to match directions
 
             margin: 9,             // distance from wall to start applying
             turnFactor: 0.1,       // scalar of force to turn away
@@ -161,9 +161,9 @@ export class BoidController {
         boidFolder.add(this.attributes, "maxSpeedY", 0, 1);
         boidFolder.add(this.attributes, "field", 0.0001, 10);
 
-        boidFolder.add(this.attributes, "minSeperation", 0, 10);
-        boidFolder.add(this.attributes, "matchFactor", 0, 10);
-        boidFolder.add(this.attributes, "centeringFactor", 0, 10);
+        boidFolder.add(this.attributes, "seperation", 0, 10);
+        boidFolder.add(this.attributes, "alignment", 0, 10);
+        boidFolder.add(this.attributes, "cohesion", 0, 10);
     }
 
     // 

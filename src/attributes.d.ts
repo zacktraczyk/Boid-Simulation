@@ -4,9 +4,9 @@ interface Attributes {
 
     field: number,
 
-    minSeperation: number,
-    centeringFactor: number,
-    matchFactor: number,
+    seperation: number,
+    cohesion: number,
+    alignment: number,
 
     margin: number,
     turnFactor: number

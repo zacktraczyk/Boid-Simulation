@@ -25,8 +25,8 @@ export class Boid {
 
         // Boid Attribute Defaults
 		this.attributes = {
-			maxSpeed: 0, maxSpeedY: 0, field: 0, minSeperation: 0,
-			centeringFactor: 0, matchFactor: 0, margin: 0, turnFactor: 0,
+			maxSpeed: 0, maxSpeedY: 0, field: 0, seperation: 0,
+			cohesion: 0, alignment: 0, margin: 0, turnFactor: 0,
         }
     }
 
@@ -68,9 +68,9 @@ export class Boid {
             neighbors++;
 
             // Avoid Others (separation)
-            if (otherBoid !== this && this.distance(otherBoid) < this.attributes.minSeperation) {
+            if (otherBoid !== this && this.distance(otherBoid) < this.attributes.seperation) {
                 let avoid = this.vel.clone().sub(otherBoid.vel)
-                this.vel.addScaledVector(avoid, 2*this.attributes.maxSpeed/100*this.attributes.minSeperation); // apply avoid force
+                this.vel.addScaledVector(avoid, 2*this.attributes.maxSpeed/100*this.attributes.seperation); // apply avoid force
             }
 
             // Match (alignment)
@@ -83,12 +83,12 @@ export class Boid {
         // Apply Match Force
         match.add(this.vel);
         match.divideScalar(neighbors);
-        this.vel.addScaledVector(match, 0.1*this.attributes.matchFactor);
+        this.vel.addScaledVector(match, 0.1*this.attributes.alignment);
 
         // Apply Center Force
         center.divideScalar(neighbors);
         center.sub(this.mesh.position);
-        this.vel.addScaledVector(center, 0.1*this.attributes.centeringFactor/100);
+        this.vel.addScaledVector(center, 0.1*this.attributes.cohesion/100);
     }
 
     // Screen Border Rules ------------------------------
