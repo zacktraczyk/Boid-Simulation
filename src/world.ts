@@ -8,7 +8,8 @@ import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls
 export class World {
     public scene: THREE.Scene;
     public camera: THREE.PerspectiveCamera;
-    public boundary: THREE.LineSegments;
+    public box: THREE.LineSegments;
+    public boundary: THREE.Box3;
 
     private renderer: THREE.WebGLRenderer;
     private cameraControls: TrackballControls;
@@ -30,8 +31,9 @@ export class World {
         // this.scene.background = new THREE.Color(0xffffff);
 
         // Boundary
-        this.boundary = this.initBoundary(x, y, z);
-        this.scene.add(this.boundary); // Render
+        this.box = this.initBoundaryBox(x, y, z);
+        this.boundary = new THREE.Box3().setFromObject(this.box);
+        this.scene.add(this.box); // Render
 
         // Renderer init
         this.renderer = this.initRenderer();
@@ -77,7 +79,7 @@ export class World {
     //
     // Initialize Boundary
     //
-    private initBoundary(x: number, y: number, z: number): THREE.LineSegments {
+    private initBoundaryBox(x: number, y: number, z: number): THREE.LineSegments {
         const box = new THREE.BoxGeometry(x, y, z); 
         const geo = new THREE.EdgesGeometry( box ); // or WireframeGeometry( geometry )
         const mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
@@ -134,16 +136,14 @@ export class World {
 // Scene floor
 // Adds sand colored plane to scene
 //
-export function initFloor(boundary: THREE.LineSegments) {
-    const boundingBox = new THREE.Box3().setFromObject(boundary);
-    const size = new THREE.Vector3();
-    boundingBox.getSize(size);
+export function initFloor(boundary: THREE.Box3) {
+    const size = boundary.max;
 
     const geo = new THREE.PlaneBufferGeometry(2000, 2000, 1, 1);
     const mat = new THREE.MeshStandardMaterial({ color: 0xebe4a0, side: THREE.DoubleSide });
     const p  = new THREE.Mesh(geo, mat);
     p.rotateX(- Math.PI/2);
-    p.position.y = -size.y/2;
+    p.position.y = -size.y;
 
     return p;
 }

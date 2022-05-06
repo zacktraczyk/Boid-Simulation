@@ -27,7 +27,7 @@ export class BoidController {
     private debugBoid_field: THREE.Mesh;
 
 
-    constructor(scene: THREE.Scene, boundary: THREE.LineSegments, mesh: THREE.Mesh, color: number, maxInst = 10) {
+    constructor(scene: THREE.Scene, boundary: THREE.Box3, mesh: THREE.Mesh, color: number, maxInst = 10) {
         this.scene = scene;
         this.boundary = boundary;
 

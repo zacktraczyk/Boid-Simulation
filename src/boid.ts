@@ -31,7 +31,7 @@ export class Boid {
     //
     // Draw Boid to canvas
     //
-    public update(boundary: THREE.LineSegments, boids: Array<Boid>) {
+    public update(boundary: THREE.Box3, boids: Array<Boid>) {
         if (this.attributes.maxSpeed == 0) return;
 
         // Update Velocity
@@ -95,30 +95,28 @@ export class Boid {
     //
     // <++> TODO: Fix Boids leaving boundary
     // <++> TODO: make smoother
-    private pushOnScreen(boundary: THREE.LineSegments) {
-        const boundingBox = new THREE.Box3().setFromObject(boundary);
-        const origin = boundingBox.min;
-        const size = new THREE.Vector3();
-        boundingBox.getSize(size);
+    private pushOnScreen(boundary: THREE.Box3) {
+        const origin = boundary.min;
+        const size = boundary.max;
 
         const turnFactor = this.attributes.maxSpeed / 150; // Adjust turnFactor with speed
 
         // x component
         if (this.mesh.position.x < origin.x + this.attributes.margin)
             this.vel.x += turnFactor;
-        else if (this.mesh.position.x > origin.x + size.x - this.attributes.margin)
+        else if (this.mesh.position.x > size.x - this.attributes.margin)
             this.vel.x -= turnFactor;
 
         // y component
         if (this.mesh.position.y < origin.y + this.attributes.margin)
             this.vel.y += turnFactor;
-        else if (this.mesh.position.y > origin.y + size.y - this.attributes.margin)
+        else if (this.mesh.position.y > size.y - this.attributes.margin)
             this.vel.y -= turnFactor;
 
         // z component
         if (this.mesh.position.z < origin.z + this.attributes.margin)
             this.vel.z += turnFactor;
-        else if (this.mesh.position.z > origin.z + size.z - this.attributes.margin)
+        else if (this.mesh.position.z > size.z - this.attributes.margin)
             this.vel.z -= turnFactor;
     }
 
@@ -127,15 +125,15 @@ export class Boid {
     //
     // Randomize X, Y, and Z position inside a given boundary
     //
-    public randomLocation(boundary: THREE.LineSegments) {
-        const boundingBox = new THREE.Box3().setFromObject(boundary);
-        const origin = boundingBox.min;
-        const size = new THREE.Vector3();
-        boundingBox.getSize(size);
+    public randomLocation(boundary: THREE.Box3) {
+        const origin = boundary.min;
+        const size = boundary.max;
 
-        const x = origin.x + Math.random() * size.x;
-        const y = origin.y + Math.random() * size.y;
-        const z = origin.z + Math.random() * size.z;
+        const x = Math.random() * (size.x - origin.x) + origin.x;
+        const y = Math.random() * (size.y - origin.y) + origin.y;
+        const z = Math.random() * (size.z - origin.z) + origin.z;
+        // const y = origin.y + Math.random() * size.y;
+        // const z = origin.z + Math.random() * size.z;
         this.mesh.position.set(x, y, z);
         this.vel.randomDirection();
 

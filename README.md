@@ -2,7 +2,7 @@
 
 Using the 3D visualization tools in the [UCSC Science & Engineering DSI](https://guides.library.ucsc.edu/DS/DSI/Home) I plan to make an interactive visualization. Specifically I plan to replicate flocking behavior using [Boids](https://cs.stanford.edu/people/eroberts/courses/soco/projects/2008-09/modeling-natural-systems/boids.html), an emerging phenomena and example of complexity theory.
 
-I hope to use the [Looking Glass Portrait](https://lookingglassfactory.com/), and the Looking Glass 4K to display my simulation in holographic 3D space. Additionally, I plan to use [Ultraleap](https://www.ultraleap.com/) to interact with the by tracking a hand in open air.
+I hope to use the [Looking Glass Portrait](https://lookingglassfactory.com/), and the Looking Glass 4K to display my simulation in holographic 3D space. Additionally, I plan to use [Ultraleap](https://www.ultraleap.com/) to interact with the simulation by tracking a hand in open air.
 
 ***[Here is my non-holographic demo.](https://xxzbuckxx.github.io/Boid-Simulation/)***
 
