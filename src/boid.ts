@@ -102,6 +102,10 @@ export class Boid {
         const turnFactor = this.attributes.maxSpeed / 150; // Adjust turnFactor with speed
 
         // x component
+        // if (this.mesh.position.x < origin.x)
+        //     this.mesh.position.x *= -1;
+        // else if (this.mesh.position.x > size.x)
+        //     this.mesh.position.x *= -1;
         if (this.mesh.position.x < origin.x + this.attributes.margin)
             this.vel.x += turnFactor;
         else if (this.mesh.position.x > size.x - this.attributes.margin)

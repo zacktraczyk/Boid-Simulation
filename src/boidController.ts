@@ -18,7 +18,7 @@ export class BoidController {
     private maxInst: number;
 
     private color: number;
-    private material: THREE.MeshBasicMaterial;
+    private material: THREE.MeshDepthMaterial;
     private mesh: THREE.Mesh;
 
     // Debug
@@ -38,21 +38,22 @@ export class BoidController {
 
         // Boid Appeareance
         this.color = color;
-        this.material = new THREE.MeshBasicMaterial({ color: color });
-        // this.material = new THREE.MeshStandardMaterial({ color: color });
+        // this.material = new THREE.MeshBasicMaterial({ color: color });
+        // this.material = new THREE.MeshNormalMaterial();
+        this.material = new THREE.MeshStandardMaterial({ color: color });
         mesh.material = this.material;
         this.mesh = mesh;
 
         // Boid Attributes
         this.attributes = {
-            maxSpeed: 4.7,
+            maxSpeed: 1,
             maxSpeedY: 1,
 
-            field: 5.2,
+            field: 5.6,
 
-            seperation: 3,
-            cohesion: 5.8,   // scalar of force to push to center
-            alignment: 5.8,  // scalar of force to match directions
+            seperation: 2.6,
+            cohesion: 0.3,   // scalar of force to push to center
+            alignment: 1.8,  // scalar of force to match directions
 
             margin: 9        // distance from wall to start applying
         }

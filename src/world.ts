@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls'
+// import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 //
 // Fish Tank
@@ -12,7 +13,7 @@ export class World {
     public boundary: THREE.Box3;
 
     private renderer: THREE.WebGLRenderer;
-    private cameraControls: TrackballControls;
+    private cameraControls: OrbitControls;
 
     constructor(x: number, y: number, z: number) {
         // Initalize Scene
@@ -22,13 +23,14 @@ export class World {
         this.camera = this.initCamera();
 
         // Light
-        this.scene.add(this.initLight());
+        this.scene.add(this.initLightDir());
+        this.scene.add(this.initLightAmb());
 
         // Fog
         this.initFog();
 
         // Background Color
-        // this.scene.background = new THREE.Color(0xffffff);
+        this.scene.background = new THREE.Color(0xff0000);
 
         // Boundary
         this.box = this.initBoundaryBox(x, y, z);
@@ -51,7 +53,7 @@ export class World {
     //
     private initCamera(): THREE.PerspectiveCamera {
         const c = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
-        c.position.set(0, 30, 65);
+        c.position.set(0, 30, 105);
         c.lookAt(this.scene.position);
         return c;
     }
@@ -59,19 +61,24 @@ export class World {
     //
     // Initialize Scene Light
     //
-    private initLight(): any {
-        const light = new THREE.DirectionalLight('white', 2);
+    private initLightDir(): any {
+        const light = new THREE.DirectionalLight('white', 1);
         light.position.set(30, 30, 30);
         return light;
     }
 
+    private initLightAmb(): any {
+        const light = new THREE.AmbientLight('white', 0.5);
+        return light;
+    }
     //
     // Initialize Scene Fog
     //
     private initFog(): void {
-        const near = 0;
-        const far = 230;
-        const color = 0x87ace8;  // blue
+        const near = 150;
+        const far = 280;
+        // const color = 0x87ace8;  // blue
+        const color = 0x000000;  // blue
         this.scene.background = new THREE.Color(color);
         this.scene.fog = new THREE.Fog(color, near, far);
     }
@@ -101,13 +108,15 @@ export class World {
     //
     // Initialize Camera Controls
     //
-    private initCameraControls(): TrackballControls {
-        const cc = new TrackballControls( this.camera, this.renderer.domElement);
+    private initCameraControls(): OrbitControls {
+        // const cc = new TrackballControls( this.camera, this.renderer.domElement);
+        const cc = new OrbitControls( this.camera, this.renderer.domElement);
         cc.target.set( 0, 0, 0 );
+        cc.autoRotate = true;
 
-        cc.rotateSpeed = 1.0;
-        cc.zoomSpeed = 1.2;
-        cc.panSpeed = 0.8;
+        // cc.rotateSpeed = 1.0;
+        // cc.zoomSpeed = 1.2;
+        // cc.panSpeed = 0.8;
 
         return cc;
     }
@@ -126,7 +135,7 @@ export class World {
     public onWindowResize(): void {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
-        this.cameraControls.handleResize(); // Camera Trackball
+        // this.cameraControls.handleResize(); // Camera Trackball
 
         this.renderer.setSize( window.innerWidth, window.innerHeight );
     }
