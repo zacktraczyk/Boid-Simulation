@@ -4,9 +4,10 @@ Using the 3D visualization tools in the [UCSC Science & Engineering DSI](https:/
 
 I hope to use the [Looking Glass Portrait](https://lookingglassfactory.com/), and the Looking Glass 4K to display my simulation in holographic 3D space. Additionally, I plan to use [Ultraleap](https://www.ultraleap.com/) to interact with the simulation by tracking a hand in open air.
 
-***[Here is my non-holographic demo.](https://xxzbuckxx.github.io/Boid-Simulation/)***
+**_[Here is my non-holographic demo.](https://xxzbuckxx.github.io/Boid-Simulation/)_**
 
 #### Tools
+
 - [Looking Glass Portrait](https://lookingglassfactory.com/product/4k)
 - [Ultraleap](https://www.ultraleap.com/)
 
@@ -19,16 +20,18 @@ To run the simulation locally in developer mode execute `npm run dev`.
 To create a static build change the base in `vite.config.js` to the desired path and then execute `npm run build`.
 
 ---
+
 ## Project Log
 
-*I documented my progress on this project below. Although this is not meant to be a guide, it can be used as one given some experience in JavaScript and the code provided at the beginning of each update.*
+_I documented my progress on this project below. Although this is not meant to be a guide, it can be used as one given some experience in JavaScript and the code provided at the beginning of each update._
 
 ---
+
 ### 22-02-23 Software Compatibility & ThreeJS Setup
 
-*[Here is the code at the end of this stage](https://github.com/xxzbuckxx/Boid-Simulation/tree/f31846cb2795a78cbaee435c9951497d7655b99a)*
+_[Here is the code at the end of this stage](https://github.com/xxzbuckxx/Boid-Simulation/tree/f31846cb2795a78cbaee435c9951497d7655b99a)_
 
-First Thing I looked into is the software that allows the looking glass/portrait to visualize things real time. Luckily, HoloPlay (the software that the portrait  uses) has a plugin for ThreeJS a javascript framework I have a bit of experience in.
+First Thing I looked into is the software that allows the looking glass/portrait to visualize things real time. Luckily, HoloPlay (the software that the portrait uses) has a plugin for ThreeJS a javascript framework I have a bit of experience in.
 
 **[HoloPlayer ThreeJS Plugin Tutorial](https://medium.com/@alxdncn/getting-started-with-the-holoplayer-three-js-library-86bdbeca351)**
 
@@ -41,16 +44,18 @@ After restructuring the project and adding a import-map to use JavaScript Module
 ![22-02-23 ThreeJS Simple Rotating Cube](https://github.com/xxzbuckxx/Boid-Simulation/blob/main/log-assets/22-02-23%20ThreeJS%20Simple%20Rotating%20Cube.gif?raw=true)
 
 ---
+
 ### 22-02-25 Debug Setup and Naive Boid Movement
-*[Here is the code at the end of this stage](https://github.com/xxzbuckxx/Boid-Simulation/tree/e665aad17aae5b6bdae8e2e6f8cf98ec09344b56)*
+
+_[Here is the code at the end of this stage](https://github.com/xxzbuckxx/Boid-Simulation/tree/e665aad17aae5b6bdae8e2e6f8cf98ec09344b56)_
 
 Now that the camera and renderer were setup, I began working on animating a single Boid. I used my constructed box as a bounding box to contain the Boids (eventually this bounding box will be the **Looking Glass**). I used my previous 2D Boid Code as a template for the methods and operations I needed, and I kept the same `Boid`/`BoidController` structure with my `BoidController` class needing minor adjustments.
 
-#### Initializing a Boid 
+#### Initializing a Boid
 
 The first thing I did was create a Boid mesh. The geometry of a Boid can be anything; in more practical examples the mesh would be a bird, or a fish. However to simplify debugging I made the mesh a Tetrahedron with the built-in normal material:
 
-``` js
+```js
 const geometry = new THREE.ConeGeometry(0.05, 0.2, 3);
 const material = new THREE.MeshNormalMaterial();
 ```
@@ -61,7 +66,7 @@ Since I was now using vectors, most of my code could be easily simplified as Thr
 
 Here is how the Boid is initialized now:
 
-``` js
+```js
 constructor(x, y, z) {
   // Create Mesh
   this.mesh = new THREE.Mesh(geometry, material);
@@ -79,7 +84,7 @@ Now that Boids can be created, I need them to move and do things. First I made a
 
 These operations only required basic vector operations already implemented in ThreeJS
 
-``` js
+```js
 // Update positions
 this.mesh.position.add(this.vel);
 
@@ -90,7 +95,7 @@ this.mesh.quaternion.setFromUnitVectors(axis, this.vel.clone().normalize());
 
 Now that a Boid can move, it needs to stay below a maximum speed, and stay within a bounding box. To handle speed I again used simple ThreeJS methods to clamp the speed of a Boid. Then to keep inside the bounding Box, I implemented a function `pushOnScreen(boundary)` that checks if the position of a Boid exceeds the box boundary subtracted by a margin. I adjust each component of the velocity vector by a turning factor to steer away from the wall and back towards the center.
 
-``` js
+```js
 const boundingBox = new THREE.Box3().setFromObject(boundary);
 const origin = boundingBox.min;
 const size = new THREE.Vector3();
@@ -98,9 +103,9 @@ boundingBox.getSize(size);
 
 // x component
 if (this.mesh.position.x < origin.x + this.margin)
-    this.vel.x += this.turnFactor;
+  this.vel.x += this.turnFactor;
 else if (this.mesh.position.x > origin.x + size.x - this.margin)
-    this.vel.x -= this.turnFactor;
+  this.vel.x -= this.turnFactor;
 
 // y & z components are the same
 ```
@@ -109,7 +114,7 @@ After making some debug methods and camera controls, I can now spawn a Boid that
 
 ![22-02-25 ThreeJS Single Boid Debug](https://github.com/xxzbuckxx/Boid-Simulation/blob/main/log-assets/22-02-25%20ThreeJS%20Single%20Boid%20Debug.gif?raw=true)
 
-Spawning multiple Boids makes the animation already has some *~pizzaz~*:
+Spawning multiple Boids makes the animation already has some _~pizzaz~_:
 
 ![22-02-25 ThreeJS 100 Naive Boids](https://github.com/xxzbuckxx/Boid-Simulation/blob/main/log-assets/22-02-25%20ThreeJS%20100%20Naive%20Boids.gif?raw=true)
 
@@ -122,36 +127,38 @@ Regardless, here are some working swarms with different meshes and other small t
 ![22-02-27 ThreeJS Boids Working Fog](https://github.com/xxzbuckxx/Boid-Simulation/blob/main/log-assets/22-02-27%20ThreeJS%20Boids%20Working%20Fog.gif?raw=true)
 
 ---
+
 ### 22-02-25 Optimization
-*[Here is the code at the end of this stage](https://github.com/xxzbuckxx/Boid-Simulation/tree/09a6cd0c333b5c2a871a5e14c89abc848917705e)*
+
+_[Here is the code at the end of this stage](https://github.com/xxzbuckxx/Boid-Simulation/tree/09a6cd0c333b5c2a871a5e14c89abc848917705e)_
 
 As I have stated before, there are a few ways to optimize the simulation so I can render more Boids with less work from the computer. There are 2 main things I can do:
 
 1. Optimize vertex computations - Perform all vertex operations in one loop, instead of three functions
 2. Optimize draw calls - Since all the Boids are the same mesh, ThreeJS has a special mesh instance that can draw all of them in one call
 
-First I rewrote the Boid methods to use ThreeJS vector operations instead of "manual" component computations. After the three methods were reimplemented, I combined them into one single method, `sim(boids)`, that  enacted all three forces in a single loop. This improved performance as the algorithm was running through every Boid three times per Boid before, and now is only running through every Boid once per Boid.
+First I rewrote the Boid methods to use ThreeJS vector operations instead of "manual" component computations. After the three methods were reimplemented, I combined them into one single method, `sim(boids)`, that enacted all three forces in a single loop. This improved performance as the algorithm was running through every Boid three times per Boid before, and now is only running through every Boid once per Boid.
 
-``` js
+```js
 let neighbors = 0;
 let match = new THREE.Vector3();
 let center = new THREE.Vector3();
 for (let otherBoid of boids) {
-    if (this.distance(otherBoid) >= this.field) continue;
+  if (this.distance(otherBoid) >= this.field) continue;
 
-    neighbors++;
+  neighbors++;
 
-    // Avoid Others (separation)
-    if (otherBoid !== this && this.distance(otherBoid) < this.minSeperation) {
-        let avoid = this.vel.clone().sub(otherBoid.vel)
-        this.vel.addScaledVector(avoid, this.avoidFactor); // apply avoid force
-    }
+  // Avoid Others (separation)
+  if (otherBoid !== this && this.distance(otherBoid) < this.minSeperation) {
+    let avoid = this.vel.clone().sub(otherBoid.vel);
+    this.vel.addScaledVector(avoid, this.avoidFactor); // apply avoid force
+  }
 
-    // Match (alignment)
-    match.add(otherBoid.vel)
+  // Match (alignment)
+  match.add(otherBoid.vel);
 
-    // Center (cohesion)
-    center.add(otherBoid.mesh.position);
+  // Center (cohesion)
+  center.add(otherBoid.mesh.position);
 }
 
 // Apply Match Force
@@ -163,7 +170,6 @@ this.vel.addScaledVector(match, this.matchFactor);
 center.divideScalar(neighbors);
 center.sub(this.mesh.position);
 this.vel.addScaledVector(center, this.centeringFactor);
-
 ```
 
 Second, I tried optimizing the mesh drawing, into a single GPU draw call. Since all the meshes are the same, I wanted to use `THREE.InstancedMesh` in ThreeJS. I got multiple meshes to render successfully, but I could not figure out a position transformation on a single mesh. After a lot of struggling I gave up, as the draw calls do not seem to be much of a bottle neck, and it was not worth the pain to try and figure it out. I will probably revisit this when I start importing more complicated meshes but for now I am leaving it alone.
@@ -171,9 +177,10 @@ Second, I tried optimizing the mesh drawing, into a single GPU draw call. Since 
 Now the total amount my computer could render before lagging and heating up went from 300 Boids to 800 Boids.
 
 ---
+
 ### 22-02-25 Ocean Feel and Code Cleanup
 
-*[Here is the Code at the end of this stage](https://github.com/xxzbuckxx/Boid-Simulation/tree/a4d11387252f5c577eb8c3c6a74b34e745bcf890)*
+_[Here is the Code at the end of this stage](https://github.com/xxzbuckxx/Boid-Simulation/tree/a4d11387252f5c577eb8c3c6a74b34e745bcf890)_
 
 Now that I can simulate flocking and my computer does not light on fire, I want to apply this simulation in a scenario. So why not simulate fish?
 
@@ -199,22 +206,23 @@ The following objects are contained in the `World` instance called `ocean`:
 6. Renderer
 7. Camera Controls
 
-Each of these objects has its own initialization method, to make the main `World` constructor easier to understand as well. 
+Each of these objects has its own initialization method, to make the main `World` constructor easier to understand as well.
 
 In addition to separating some of the initialization from `main.js`, I also gave the `BoidController` class its own file, instead of keeping it at the bottom of `boid.js`.
 
 ---
+
 ### 22-03-07 Importing Models
 
 The next step in making my simulation look more like the ocean is actually importing the fish models. Luckily, ThreeJS has a module to import 3D models from a variety of 3D formats. The format I will be using is glTF 2.0 ([here is why](https://godotengine.org/article/we-should-all-use-gltf-20-export-3d-assets-game-engines)) so I downloaded the and setup the ThreeJS [glTF Loader Module](https://threejs.org/manual/#en/load-gltf).
 
-All I needed to do was load the model in, then clone the Model for each Boid instance to store. This should have been a simple step but I had a bit of difficulty because I did not read enough into the documentation. In the ThreeJS loader I was using it loaded things asynchronously, meaning JavaScript would create a task to load the model, but continue to animate and execute code why the model loaded in the background. 
+All I needed to do was load the model in, then clone the Model for each Boid instance to store. This should have been a simple step but I had a bit of difficulty because I did not read enough into the documentation. In the ThreeJS loader I was using it loaded things asynchronously, meaning JavaScript would create a task to load the model, but continue to animate and execute code why the model loaded in the background.
 
-``` js
+```js
 const loader = new GLTFLoader();
-const fishData = await loader.loadAsync('../models/logo.glb');
+const fishData = await loader.loadAsync("../models/logo.glb");
 const fishMesh = fishData.scene.children[0];
-return { fishMesh }
+return { fishMesh };
 ```
 
 This is obviously helpful most cases where you want to reduce loading lag. Usually you do not want your whole program to halt completely while it loads in a bunch of data. However, to initialize and animate a Boid, the model needed to be initialized first. The mesh holds the position data so the position cannot be changed until the mesh exists. To solve this issue I used the `await` keyword to insure the import finishes before the rest of the initialization code is executed.
@@ -224,6 +232,7 @@ For the test fish 3D Model I used blender to convert a STL file into a glTF. I u
 ![22-03-07 ThreeJS Boids 2 Flock UCSC Model](https://github.com/xxzbuckxx/Boid-Simulation/blob/main/log-assets/22-03-07%20ThreeJS%20Boids%202%20Flock%20UCSC%20Model.gif?raw=true)
 
 ---
+
 ### 22-04-22 Code Refactor and GUI update
 
 [Here is the code at the end of this stage](https://github.com/xxzbuckxx/Boid-Simulation/tree/060319d00bc5566329b232d01fbae34d7495d0f6)
@@ -245,7 +254,34 @@ Next, I decided to scale my Boid attributes to have more sensible parameters. Th
 Finally, I decided to do some Git cleanup and add this log to the Github. I wanted the repo to contain all the information about the project so I uploaded the images and this README. I merged the 3D branch into the `main`, and created a `gh-pages` branch to designate for the static site to be displayed. Finally, I aded a "See How I work" button to link to the github code.
 
 ---
+
+### 22-05-24 Vicky's Fish
+
+[Here is the code at the end of this stage]()
+
+Finally I have fish! Thanks to @vickychaij from the DSC, I finally have 3D fish models to represent my boids. Here they are imported into the simulation:
+
+![22-05-24 Vicky Fish First Import](https://trello.com/1/cards/6262e9e49378b16a301455ff/attachments/628d20ad2815c628856bf102/previews/628d20bc2815c628856bf67d/download/22-05-24_Vicky_Fish_First_Import.gif)
+
+One thing I need to address is the material on the fish. Flat shading like this makes them sort of resemble blobs and takes away from the excellent modeling work that was done. Either I need to add texture, or change the material and lighting for the scene.
+
+---
+
+### 23-01-13 Looking Glass Arrives!
+
+Finally the Looking Glass Portrait has arrived! I am excited to finally running my simulation on the technology. I followed the [ThreeJS Looking Glass Integration Documentation](https://docs.lookingglassfactory.com/developer-tools/webxr/three.js), and tried running the simulation. Sadly, when trying to run the VR simulation the console threw the following error:
+
+```
+TypeError: Cannot read properties of undefined (reading 'matrix')
+```
+
+Frustratingly the stack trace only pointed to internal library functions within three.js and XRSession.js that had something to do with a camera variable inside some array being undefined. Infuriatingly I have to find a way to track down what is causing this error, without having any good idea where to start looking. Hopefully I can fix this next time I work on it.
+
+---
+
 ## References
+
 1. [boid simulation](https://cs.stanford.edu/people/eroberts/courses/soco/projects/2008-09/modeling-natural-systems/boids.html)
 2. [Boid Github Repository](https://github.com/xxzbuckxx/Boid-Simulation)
 3. [Leap Motion WebGL Demo](https://developer-archive.leapmotion.com/gallery/touch-with-webgl-leap-motion)
+4. [ThreeJS Looking Glass Integration](https://docs.lookingglassfactory.com/developer-tools/webxr/three.js)
