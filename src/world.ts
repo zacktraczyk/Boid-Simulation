@@ -25,7 +25,7 @@ export class World {
     // this.scene.add(this.initLight());
 
     // Fog
-    // this.initFog();
+    this.initFog();
 
     // Background Color
     // this.scene.background = new THREE.Color(0xffffff);
@@ -54,9 +54,9 @@ export class World {
       70,
       window.innerWidth / window.innerHeight,
       1,
-      1000
+      100
     );
-    c.position.set(0, 30, 65);
+    c.position.set(0, 0, 3);
     c.lookAt(this.scene.position);
     return c;
   }
@@ -74,10 +74,11 @@ export class World {
   // Initialize Scene Fog
   //
   private initFog(): void {
-    const near = 0;
-    const far = 230;
-    const color = 0x87ace8; // blue
-    this.scene.background = new THREE.Color(color);
+    const near = 4;
+    const far = 10;
+    // const color = 0x87ace8; // blue
+    const color = 0x00; // blue
+    // this.scene.background = new THREE.Color(color);
     this.scene.fog = new THREE.Fog(color, near, far);
   }
 

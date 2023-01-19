@@ -17,6 +17,6 @@
     "@lookingglass/webxr": "^0.3.0",
     "@types/dat.gui": "^0.7.7",
     "dat.gui": "^0.7.9",
-    "three": "^0.139.2"
+    "three": "^0.148.0"
   }
 }
