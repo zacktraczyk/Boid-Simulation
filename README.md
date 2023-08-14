@@ -281,6 +281,20 @@ Frustratingly the stack trace only pointed to internal library functions within 
 
 ---
 
+### 23-06-09 Finally Seeing Holograms
+
+[Here is the code at the end of this stage](https://github.com/xxzbuckxx/Boid-Simulation/tree/49ebf32ea23a932c80e4f83c73ab95c8d10ebaef)
+
+After an hour of troubleshooting I figured out why my simulation was not running. The was solution was frustratingly simple. The version of Three.JS that my visualization used needed to be updated to a more recent version. After I got that fixed the code worked and I could finally see my visualization on the Looking Glass!
+
+However, there were quite a few problems to solve. First, the scale of everything was way to big. This took a bit of time as the speed needed to be adjusted with the scale of the boids.
+
+Here is a quick preview how it looks in a dark room:
+
+![Working Portrait Simulation](https://github.com/xxzbuckxx/Boid-Simulation/blob/main/log-assets/23-06-09%20Portrait%20Hologram%20Working.gif?raw=true)
+
+---
+
 ## References
 
 1. [boid simulation](https://cs.stanford.edu/people/eroberts/courses/soco/projects/2008-09/modeling-natural-systems/boids.html)
