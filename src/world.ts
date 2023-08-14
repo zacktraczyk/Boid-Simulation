@@ -56,7 +56,7 @@ export class World {
       1,
       100
     );
-    c.position.set(0, 0, 3);
+    c.position.set(0, 0, 6);
     c.lookAt(this.scene.position);
     return c;
   }
@@ -64,11 +64,11 @@ export class World {
   //
   // Initialize Scene Light
   //
-  private initLight(): any {
-    const light = new THREE.DirectionalLight("white", 2);
-    light.position.set(30, 30, 30);
-    return light;
-  }
+  // private initLight(): any {
+  //   const light = new THREE.DirectionalLight("white", 2);
+  //   light.position.set(30, 30, 30);
+  //   return light;
+  // }
 
   //
   // Initialize Scene Fog

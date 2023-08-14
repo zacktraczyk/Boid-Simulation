@@ -257,7 +257,7 @@ Finally, I decided to do some Git cleanup and add this log to the Github. I want
 
 ### 22-05-24 Vicky's Fish
 
-[Here is the code at the end of this stage]()
+_No uploaded code changes for this stage_
 
 Finally I have fish! Thanks to @vickychaij from the DSC, I finally have 3D fish models to represent my boids. Here they are imported into the simulation:
 
@@ -269,7 +269,9 @@ One thing I need to address is the material on the fish. Flat shading like this 
 
 ### 23-01-13 Looking Glass Arrives!
 
-Finally the Looking Glass Portrait has arrived! I am excited to finally running my simulation on the technology. I followed the [ThreeJS Looking Glass Integration Documentation](https://docs.lookingglassfactory.com/developer-tools/webxr/three.js), and tried running the simulation. Sadly, when trying to run the VR simulation the console threw the following error:
+_No uploaded code changes for this stage_
+
+Finally the Looking Glass Portrait has arrived! I am excited to get my simulation running on the technology at last. I followed the [ThreeJS Looking Glass Integration Documentation](https://docs.lookingglassfactory.com/developer-tools/webxr/three.js), and tried running the simulation. Sadly, when trying to run the VR simulation the console threw the following error:
 
 ```
 TypeError: Cannot read properties of undefined (reading 'matrix')

@@ -52,13 +52,13 @@ export class BoidController {
       maxSpeed: 0.5,
       maxSpeedY: 1,
 
-      field: 5.2,
+      field: 2,
 
-      seperation: 3,
-      cohesion: 5.8, // scalar of force to push to center
-      alignment: 5.8, // scalar of force to match directions
+      seperation: 4,
+      cohesion: 7.8, // scalar of force to push to center
+      alignment: 1, // scalar of force to match directions
 
-      margin: 0.1, // distance from wall to start applying
+      margin: 0.3, // distance from wall to start applying
     };
 
     this.spawn();

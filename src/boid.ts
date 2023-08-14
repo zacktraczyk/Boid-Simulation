@@ -109,7 +109,7 @@ export class Boid {
     const origin = boundary.min;
     const size = boundary.max;
 
-    const turnFactor = this.attributes.maxSpeed / 10000; // Adjust turnFactor with speed
+    const turnFactor = this.attributes.maxSpeed / 1000; // Adjust turnFactor with speed
 
     // x component
     if (this.mesh.position.x < origin.x + this.attributes.margin)

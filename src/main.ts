@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import * as dat from "dat.gui";
-import { initFloor, World } from "./world";
+import { World } from "./world";
 import { BoidController } from "./boidController";
 import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
 import {
@@ -25,12 +25,9 @@ async function Init() {
   // Create World
   ocean = new World(3, 4, 2);
 
-  // Floor
-  ocean.scene.add(initFloor(ocean.boundary));
-
   // Load Fish Mesh
   fishMesh = new THREE.Mesh(
-    new THREE.BoxGeometry(0.1, 0.1, 0.4),
+    new THREE.BoxGeometry(0.05, 0.05, 0.2),
     new THREE.MeshBasicMaterial()
   );
 
