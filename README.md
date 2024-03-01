@@ -13,11 +13,11 @@ I hope to use the [Looking Glass Portrait](https://lookingglassfactory.com/), an
 
 ## How To Run
 
-This project was built with nodejs, so node and npm are required to run the demo. First install the required node packages by running `node install` in the project directory.
+This project was built with nodejs, and I use bun as the javascript runtime and package manager (although you are welcome to use another package manager). First install the required node packages by running `bun install` in the project directory.
 
-To run the simulation locally in developer mode execute `npm run dev`.
+To run the simulation locally in developer mode execute `bun run dev`.
 
-To create a static build change the base in `vite.config.js` to the desired path and then execute `npm run build`.
+To create a static build change the base in `vite.config.js` to the desired path and then execute `bun run build`.
 
 ---
 
